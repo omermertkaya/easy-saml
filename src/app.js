@@ -299,7 +299,9 @@ app.post('/login', passport.authenticate('local', {
 // Login Process (SAML Trigger)
 app.get('/login/sso', (req, res, next) => {
     // LOOP DETECTION: Check if IdP is redirecting back here with a response
-    if (req.query.SAMLResponse || req.body.SAMLResponse) {
+    // Safely check properties to avoid 'undefined' errors
+    const hasSAMLResponse = (req.query && req.query.SAMLResponse) || (req.body && req.body.SAMLResponse);
+    if (hasSAMLResponse) {
         console.error('[CRITICAL] SAMLResponse detected at /login/sso! This indicates an IdP configuration error.');
         console.error('The IdP ACS URL is likely set to /login/sso instead of /login/sso/callback');
         return res.status(400).send(`
