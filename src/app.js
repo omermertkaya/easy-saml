@@ -429,12 +429,12 @@ app.post('/admin/save-saml', (req, res) => {
         // We expect a structured form, or we can parse flat body to structure
         // But simpler is to reconstruct the object from the form fields.
 
-        // 1. SP Settings - REMOVED from UI (Read-only now)
-        // safeSet(samlConfig, 'sp.entityId', req.body.sp_entityId);
-        // safeSet(samlConfig, 'sp.acsUrl', req.body.sp_acsUrl);
-        // safeSet(samlConfig, 'sp.nameIdFormat', req.body.sp_nameIdFormat || 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress');
+        // 1. SP Settings - Edit Enabled
+        safeSet(samlConfig, 'sp.entityId', req.body.sp_entityId);
+        safeSet(samlConfig, 'sp.acsUrl', req.body.sp_acsUrl);
+        safeSet(samlConfig, 'sp.nameIdFormat', req.body.sp_nameIdFormat || 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress');
 
-        // if (req.body.sp_privateKey) safeSet(samlConfig, 'sp.privateKey', req.body.sp_privateKey);
+        if (req.body.sp_privateKey) safeSet(samlConfig, 'sp.privateKey', req.body.sp_privateKey);
         // Note: certificates usually need formatting, for demo we take raw string
 
         // 2. IdP Settings

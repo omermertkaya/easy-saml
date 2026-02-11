@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    container_name: easy-saml-app
     build: .
     ports:
       - "3000:3000"
@@ -10,5 +11,6 @@ services:
       - ./saml-config.json:/app/saml-config.json
     environment:
       - PORT=3000
-      - SESSION_SECRET=bu_gizli_anahtar_degistirilmeli
+      - SESSION_SECRET=bu_gizli_anahtar_degistirilmeli_docker
+      - NODE_ENV=production
     restart: always

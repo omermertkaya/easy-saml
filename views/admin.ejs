@@ -55,40 +55,42 @@
 
                                 <form action="/admin/save-saml" method="POST">
 
-                                    <!-- Integration Info (Read-only) -->
-                                    <div class="alert alert-primary bg-primary-subtle border-0 mb-4 rounded-3">
+                                    <!-- SP Settings & Integration Info -->
+                                    <div class="alert alert-secondary bg-light border mb-4 rounded-3">
                                         <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-info-circle-fill text-primary fs-4 me-2"></i>
-                                            <h5 class="mb-0 text-primary fw-bold">Entegrasyon Bilgileri</h5>
+                                            <i class="bi bi-gear-fill text-dark fs-4 me-2"></i>
+                                            <h5 class="mb-0 text-dark fw-bold">Service Provider (SP) Ayarları</h5>
                                         </div>
-                                        <p class="small text-muted mb-3">Bu bilgileri Identity Provider (IdP)
-                                            tarafındaki konfigürasyona girmelisiniz.</p>
+                                        <p class="small text-muted mb-3">Uygulamanızın adresi veya protokolü
+                                            (http/https) değiştiğinde buradan güncelleyebilirsiniz.</p>
 
                                         <div class="row g-3">
                                             <div class="col-md-6">
-                                                <label
+                                                <label for="sp_entityId"
                                                     class="form-label fw-bold small text-uppercase text-secondary">Entity
                                                     ID / Issuer</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control font-monospace bg-white"
+                                                    <input type="text" class="form-control font-monospace"
+                                                        id="sp_entityId" name="sp_entityId"
                                                         value="<%= config.sp ? config.sp.entityId : 'passport-saml' %>"
-                                                        readonly>
+                                                        required>
                                                     <button class="btn btn-outline-secondary" type="button"
-                                                        onclick="navigator.clipboard.writeText(this.previousElementSibling.value)"><i
-                                                            class="bi bi-clipboard"></i></button>
+                                                        onclick="navigator.clipboard.writeText(document.getElementById('sp_entityId').value)"
+                                                        title="Kopyala"><i class="bi bi-clipboard"></i></button>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label
+                                                <label for="sp_acsUrl"
                                                     class="form-label fw-bold small text-uppercase text-secondary">ACS
                                                     URL / Callback URL</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control font-monospace bg-white"
+                                                    <input type="text" class="form-control font-monospace"
+                                                        id="sp_acsUrl" name="sp_acsUrl"
                                                         value="<%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %>"
-                                                        readonly>
+                                                        required>
                                                     <button class="btn btn-outline-secondary" type="button"
-                                                        onclick="navigator.clipboard.writeText(this.previousElementSibling.value)"><i
-                                                            class="bi bi-clipboard"></i></button>
+                                                        onclick="navigator.clipboard.writeText(document.getElementById('sp_acsUrl').value)"
+                                                        title="Kopyala"><i class="bi bi-clipboard"></i></button>
                                                 </div>
                                             </div>
                                         </div>
