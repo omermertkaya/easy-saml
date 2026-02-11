@@ -1,19 +1,19 @@
 FROM node:18-alpine
 
-# Çalışma dizinini oluştur
+# Çalışma dizinini ayarla
 WORKDIR /app
 
 # Paket dosyalarını kopyala
 COPY package*.json ./
 
-# Bağımlılıkları yükle
-RUN npm install
+# Sadece production bağımlılıklarını yükle (CI ortamı gibi davranır)
+RUN npm ci --only=production
 
 # Kaynak kodları kopyala
 COPY . .
 
-# Uygulama portunu dışarı aç
+# Uygulamanın çalışacağı port
 EXPOSE 3000
 
 # Uygulamayı başlat
-CMD ["npm", "start"]
+CMD ["node", "src/app.js"]
