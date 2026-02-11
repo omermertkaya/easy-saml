@@ -1,0 +1,6 @@
+{
+    "ignore": [
+        "saml-config.json"
+    ],
+    "ext": "js,json"
+}

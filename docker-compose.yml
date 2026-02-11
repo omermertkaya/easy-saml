@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      # SAML konfigürasyonunun kalıcı olması için volume mapping
+      - ./saml-config.json:/app/saml-config.json
+    environment:
+      - PORT=3000
+      - SESSION_SECRET=bu_gizli_anahtar_degistirilmeli
+    restart: always

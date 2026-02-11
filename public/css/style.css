@@ -1,0 +1,36 @@
+/* Custom styles to override or augment Bootstrap */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+/* SAML Admin Button - Custom High Visibility */
+/* SAML Admin Button - Custom High Visibility */
+.btn-custom-saml-admin {
+    background-color: #ffd700;
+    /* Gold/Yellow */
+    color: #052c65 !important;
+    /* Dark Navy Blue - Harmonious with Navbar */
+    font-weight: bold;
+    border: 2px solid #ffd700;
+    transition: all 0.3s ease;
+}
+
+.btn-custom-saml-admin:hover {
+    background-color: #ffc107;
+    /* Slightly darker */
+    border-color: #ffc107;
+    color: #052c65 !important;
+    transform: scale(1.05);
+    /* Slight zoom for effect */
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Animations, etc can be added here */

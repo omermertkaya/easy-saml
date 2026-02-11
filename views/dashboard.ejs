@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Highlight.js CSS for XML Syntax Highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <style>
+        .xml-container {
+            position: relative;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            opacity: 0.8;
+        }
+
+        .btn-copy:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-shield-lock-fill me-2"></i>IAMERT SAML</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/glossary"><i class="bi bi-book-half me-1"></i> Sözlük</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-custom-saml-admin ms-2 px-3" href="/admin"><i
+                                class="bi bi-gear-fill me-1"></i> Admin Paneli</a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link active ms-3">Hoşgeldin, <%= user.username %></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-danger text-white ms-2 px-3" href="/logout">Çıkış Yap</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                        <h4 class="card-title text-center text-primary"><i
+                                class="bi bi-person-circle display-4 d-block mb-3"></i>Profil Bilgileri</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <i class="bi bi-person me-2 text-muted"></i>
+                                    <strong>Kullanıcı Adı</strong>
+                                </div>
+                                <span class="text-secondary">
+                                    <%= user.username %>
+                                </span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <i class="bi bi-envelope me-2 text-muted"></i>
+                                    <strong>E-Posta</strong>
+                                </div>
+                                <span class="text-secondary">
+                                    <%= user.email %>
+                                </span>
+                            </div>
+                            <% if (user.source) { %>
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <i class="bi bi-hdd-network me-2 text-muted"></i>
+                                        <strong>Giriş Tipi</strong>
+                                    </div>
+                                    <span class="badge bg-info text-dark text-uppercase">
+                                        <%= user.source %>
+                                    </span>
+                                </div>
+                                <% } %>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-center py-3">
+                        <a href="/" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-left me-1"></i>Ana
+                            Sayfaya Dön</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eğitim Modu: SAML Akışı ve Detayları -->
+            <% if (user.source==='saml' ) { %>
+                <div class="col-md-8 mt-4">
+                    <div class="card shadow-sm border-0 border-top border-4 border-info">
+                        <div class="card-header bg-white pt-4 pb-2">
+                            <h4 class="fw-bold text-info"><i class="bi bi-mortarboard-fill me-2"></i>SAML Analizi</h4>
+                            <p class="text-muted small">Bu oturum SAML protokolü kullanılarak gerçekleşti. Aşağıdaki
+                                detayları inceleyerek süreci öğrenebilirsiniz.</p>
+                        </div>
+                        <div class="card-body">
+
+                            <!-- Görsel Akış -->
+                            <div class="mb-4 text-center d-none d-md-block">
+                                <h6 class="text-uppercase text-muted fw-bold mb-3 ls-1">Kimlik Doğrulama Akışı</h6>
+                                <div class="d-flex justify-content-between align-items-center px-4">
+                                    <div class="text-center">
+                                        <div class="badge bg-secondary p-3 rounded-circle mb-2"><i
+                                                class="bi bi-pc-display fs-4"></i></div>
+                                        <div class="fw-bold small">Kullanıcı (Browser)</div>
+                                    </div>
+                                    <div class="flex-grow-1 px-2 position-relative">
+                                        <div class="progress" style="height: 2px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%">
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">1.
+                                            Giriş İsteği</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="badge bg-primary p-3 rounded-circle mb-2"><i
+                                                class="bi bi-server fs-4"></i></div>
+                                        <div class="fw-bold small">Service Provider (Eğitim Uygulaması)</div>
+                                    </div>
+                                    <div class="flex-grow-1 px-2 position-relative">
+                                        <div class="progress" style="height: 2px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%">
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">2.
+                                            SAML Request</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="badge bg-warning text-dark p-3 rounded-circle mb-2"><i
+                                                class="bi bi-shield-check fs-4"></i></div>
+                                        <div class="fw-bold small">Identity Provider (IdP)</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end align-items-center px-4 mt-3">
+                                    <div class="flex-grow-1 px-5 position-relative">
+                                        <div class="progress" style="height: 2px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%">
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">3.
+                                            SAML Response (Assertion)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Gelen Veriler -->
+                            <h6 class="text-uppercase text-muted fw-bold mb-3 mt-4 ls-1">SAML Mesajları ve Profili</h6>
+
+                            <div class="accordion" id="accordionSaml">
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingRequest">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseRequest"
+                                            aria-expanded="false" aria-controls="collapseRequest">
+                                            <i class="bi bi-arrow-right-circle me-2 text-warning"></i> SAML İsteği (XML)
+                                            - (SP -> IdP)
+                                        </button>
+                                    </h2>
+                                    <div id="collapseRequest" class="accordion-collapse collapse"
+                                        aria-labelledby="headingRequest" data-bs-parent="#accordionSaml">
+                                        <div class="accordion-body bg-light">
+                                            <% if (user.samlRequestXML) { %>
+                                                <div class="xml-container">
+                                                    <button class="btn btn-sm btn-light border btn-copy"
+                                                        onclick="copyToClipboard('reqXmlCode', this)">
+                                                        <i class="bi bi-clipboard"></i> Kopyala
+                                                    </button>
+                                                    <pre class="mb-0 rounded"
+                                                        style="max-height: 400px; overflow-y: auto;"><code id="reqXmlCode" class="language-xml small"><%= user.samlRequestXML %></code></pre>
+                                                </div>
+                                                <div class="mt-2 small text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i> Bu XML, giriş yaparken
+                                                    Identity Provider'a gönderilen <code>AuthnRequest</code> mesajıdır.
+                                                </div>
+
+                                                <!-- Request Detay Tablosu (JS ile doldurulur) -->
+                                                <div class="mt-3">
+                                                    <h6 class="small fw-bold text-muted border-bottom pb-1">İstek
+                                                        Detayları (Parsed)</h6>
+                                                    <table class="table table-bordered table-sm small mb-0 bg-white">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="fw-bold text-muted" style="width: 30%">ID
+                                                                </td>
+                                                                <td id="reqId" class="font-monospace">-</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold text-muted">Zaman (IssueInstant)</td>
+                                                                <td id="reqTime" class="font-monospace">-</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold text-muted">Hedef (Destination)</td>
+                                                                <td id="reqDest" class="font-monospace text-break">-
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="fw-bold text-muted">Gönderen (Issuer)</td>
+                                                                <td id="reqIssuer" class="font-monospace">-</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="alert alert-warning mb-0 small">
+                                                        SAML İsteği yakalanamadı. Lütfen tekrar giriş yapmayı deneyin.
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingResponse">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseResponse"
+                                            aria-expanded="false" aria-controls="collapseResponse">
+                                            <i class="bi bi-arrow-left-circle me-2 text-success"></i> SAML Yanıtı (XML)
+                                            - (IdP -> SP)
+                                        </button>
+                                    </h2>
+                                    <div id="collapseResponse" class="accordion-collapse collapse"
+                                        aria-labelledby="headingResponse" data-bs-parent="#accordionSaml">
+                                        <div class="accordion-body bg-light">
+                                            <% if (user.samlResponseXML) { %>
+                                                <div class="xml-container">
+                                                    <button class="btn btn-sm btn-light border btn-copy"
+                                                        onclick="copyToClipboard('resXmlCode', this)">
+                                                        <i class="bi bi-clipboard"></i> Kopyala
+                                                    </button>
+                                                    <pre class="mb-0 rounded"
+                                                        style="max-height: 400px; overflow-y: auto;"><code id="resXmlCode" class="language-xml small"><%= user.samlResponseXML %></code></pre>
+                                                </div>
+                                                <div class="mt-2 small text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i> Bu XML, Identity Provider'dan
+                                                    dönen ve kimlik doğrulama başarısını içeren <code>Response</code>
+                                                    mesajıdır.
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="alert alert-warning mb-0 small">
+                                                        SAML Yanıtı yakalanamadı.
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                                            aria-expanded="false" aria-controls="collapseOne">
+                                            <i class="bi bi-code-slash me-2 text-primary"></i> Çözümlenmiş Profil (JSON)
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse"
+                                        aria-labelledby="headingOne" data-bs-parent="#accordionSaml">
+                                        <div class="accordion-body bg-light">
+                                            <pre class="mb-0"
+                                                style="max-height: 300px; overflow-y: auto;"><code class="small language-json"><%= JSON.stringify(user.samlProfile, null, 2) %></code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                                            aria-expanded="false" aria-controls="collapseTwo">
+                                            <i class="bi bi-file-earmark-code me-2 text-success"></i> Anahtar SAML
+                                            Özellikleri
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse"
+                                        aria-labelledby="headingTwo" data-bs-parent="#accordionSaml">
+                                        <div class="accordion-body p-0">
+                                            <table class="table table-striped table-hover mb-0 small">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Özellik</th>
+                                                        <th>Değer</th>
+                                                        <th>Açıklama</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="fw-bold">NameID</td>
+                                                        <td class="text-break">
+                                                            <%= user.samlProfile.nameID || '-' %>
+                                                        </td>
+                                                        <td class="text-muted">Kullanıcının IdP'deki benzersiz kimliği.
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-bold">SessionIndex</td>
+                                                        <td class="text-break">
+                                                            <%= user.samlProfile.sessionIndex || '-' %>
+                                                        </td>
+                                                        <td class="text-muted">Bu oturuma ait benzersiz token.</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-bold">Email</td>
+                                                        <td class="text-break">
+                                                            <%= user.email || '-' %>
+                                                        </td>
+                                                        <td class="text-muted">Kullanıcının IdP'deki benzersiz kimliği
+                                                            (Mapped).
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                    <!-- Live Events Log -->
+                    <div class="col-md-8 mt-4">
+                        <div class="card shadow-sm border-0 border-top border-4 border-warning">
+                            <div
+                                class="card-header bg-white pt-4 pb-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="fw-bold text-warning"><i class="bi bi-activity me-2"></i>Olay Günlüğü
+                                        (Live Events)</h4>
+                                    <p class="text-muted small mb-0">SAML akışının adım adım işlem kayıtları.</p>
+                                </div>
+                                <span class="badge bg-light text-dark border">
+                                    <%= events.length %> Olay
+                                </span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush">
+                                    <% if (events && events.length> 0) { %>
+                                        <% events.slice().reverse().forEach(function(event) { %>
+                                            <div class="list-group-item px-4 py-3">
+                                                <div
+                                                    class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                                    <h6
+                                                        class="mb-0 fw-bold <%= event.stage === 'SP' ? 'text-primary' : (event.stage === 'IdP' ? 'text-warning' : 'text-secondary') %>">
+                                                        [<%= event.stage %>] <%= event.title %>
+                                                    </h6>
+                                                    <small class="text-muted font-monospace">
+                                                        <%= new Date(event.timestamp).toLocaleTimeString() %>
+                                                    </small>
+                                                </div>
+                                                <p class="mb-1 small text-dark">
+                                                    <%= event.message %>
+                                                </p>
+                                                <% if (event.data) { %>
+                                                    <div class="mt-2">
+                                                        <button class="btn btn-xs btn-outline-secondary p-0 px-2"
+                                                            type="button" data-bs-toggle="collapse"
+                                                            data-bs-target="#eventData<%= event.id %>"
+                                                            aria-expanded="false">
+                                                            <i class="bi bi-code"></i> Detay
+                                                        </button>
+                                                        <div class="collapse mt-1" id="eventData<%= event.id %>">
+                                                            <pre
+                                                                class="bg-light p-2 border rounded small mb-0"><code><%= JSON.stringify(event.data, null, 2) %></code></pre>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
+                                            </div>
+                                            <% }); %>
+                                                <% } else { %>
+                                                    <div class="p-4 text-center text-muted">
+                                                        <i class="bi bi-hourglass-split fs-4 d-block mb-2"></i>
+                                                        Henüz bir olay kaydedilmedi.
+                                                    </div>
+                                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+        </div>
+    </div>
+
+    <footer class="text-center mt-5 mb-4 text-muted border-top pt-4">
+        <p class="mb-1">Created by <strong>Ömer Mert Kaya</strong></p>
+        <p class="mb-2"><span class="badge bg-secondary">IAM Engineer</span></p>
+        <a href="https://omermertkaya.github.io" target="_blank" class="text-decoration-none text-primary">
+            <i class="bi bi-globe me-1"></i>omermertkaya.github.io
+        </a>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/xml.min.js"></script>
+
+    <script>
+        // Basit XML Formatlayıcı
+        function formatXml(xml) {
+            let formatted = '';
+            let reg = /(>)(<)(\/*)/g;
+            xml = xml.replace(reg, '$1\r\n$2$3');
+            let pad = 0;
+            xml.split('\r\n').forEach(function (node, index) {
+                let indent = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                    indent = 0;
+                } else if (node.match(/^<\/\w/)) {
+                    if (pad != 0) {
+                        pad -= 1;
+                    }
+                } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+                    indent = 1;
+                } else {
+                    indent = 0;
+                }
+
+                let padding = '';
+                for (let i = 0; i < pad; i++) {
+                    padding += '  ';
+                }
+
+                formatted += padding + node + '\r\n';
+                pad += indent;
+            });
+            return formatted;
+        }
+
+        // Kopyala Fonksiyonu
+        function copyToClipboard(elementId, btnElement) {
+            const codeBlock = document.getElementById(elementId);
+            const text = codeBlock.innerText; // innerText, formatlanmış halini alır
+
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="bi bi-check2"></i> Kopyalandı';
+                btnElement.classList.remove('btn-light');
+                btnElement.classList.add('btn-success', 'text-white');
+
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.classList.add('btn-light');
+                    btnElement.classList.remove('btn-success', 'text-white');
+                }, 2000);
+            }).catch(err => {
+                console.error('Kopyalama başarısız:', err);
+                alert('Kopyalama başarısız oldu.');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Tüm XML kod bloklarını bul ve formatla
+            document.querySelectorAll('code.language-xml').forEach((block) => {
+                // Ham içeriği al (EJS ile basılan)
+                let rawXml = block.innerHTML;
+                // HTML Entity decode işlemi (simple way for basic XML chars)
+                const textarea = document.createElement('textarea');
+                textarea.innerHTML = rawXml;
+                let decodedXml = textarea.value;
+
+                if (decodedXml && decodedXml.trim().startsWith('<')) {
+                    // Pretty Print
+                    block.textContent = formatXml(decodedXml);
+                }
+
+                // Highlight
+                hljs.highlightElement(block);
+            });
+
+            // Parse SAML Request Details
+            parseAndDisplayRequestDetails();
+        });
+
+        function parseAndDisplayRequestDetails() {
+            try {
+                // Get raw XML from the code block (it might be formatted now)
+                const codeBlock = document.getElementById('reqXmlCode');
+                if (!codeBlock) return;
+
+                let rawXml = codeBlock.innerText;
+                // Create a parser
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(rawXml, "text/xml");
+
+                // Handle namespaces loosely
+                const authnRequest = xmlDoc.getElementsByTagName("AuthnRequest")[0] ||
+                    xmlDoc.getElementsByTagName("samlp:AuthnRequest")[0] ||
+                    xmlDoc.documentElement; // Fallback if root is the element
+
+                if (authnRequest) {
+                    document.getElementById('reqId').innerText = authnRequest.getAttribute('ID') || '-';
+                    document.getElementById('reqTime').innerText = authnRequest.getAttribute('IssueInstant') || '-';
+                    document.getElementById('reqDest').innerText = authnRequest.getAttribute('Destination') || '-';
+
+                    const issuer = xmlDoc.getElementsByTagName("Issuer")[0] ||
+                        xmlDoc.getElementsByTagName("saml:Issuer")[0];
+                    if (issuer) {
+                        document.getElementById('reqIssuer').innerText = issuer.textContent;
+                    }
+                }
+            } catch (e) {
+                console.error("Error parsing SAML Request details:", e);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="bg-light">
+    <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+        <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+            <div class="card-body">
+                <div class="text-center mb-4 text-primary">
+                    <i class="bi bi-shield-lock-fill display-4"></i>
+                    <h3 class="fw-bold mt-2">IAMERT SAML</h3>
+                </div>
+                <h5 class="text-center text-muted mb-4">
+                    <%= title %>
+                </h5>
+
+                <% if (locals.defaultUser) { %>
+                    <div class="alert alert-info border-start border-4 border-info" role="alert">
+                        <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle-fill me-2"></i>Eğitim Modu</h6>
+                        <hr class="my-2">
+                        <small class="d-block"><strong>Kullanıcı:</strong>
+                            <%= defaultUser.username %>
+                        </small>
+                        <small class="d-block"><strong>Şifre:</strong>
+                            <%= defaultUser.password %>
+                        </small>
+                    </div>
+                    <% } %>
+
+                        <% if (locals.message) { %>
+                            <div class="alert alert-danger" role="alert">
+                                <%= message %>
+                            </div>
+                            <% } %>
+
+                                <form action="/login" method="POST">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Kullanıcı Adı</label>
+                                        <input type="text" class="form-control" id="username" name="username" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Şifre</label>
+                                        <input type="password" class="form-control" id="password" name="password"
+                                            required>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-lg">Giriş Yap</button>
+                                    </div>
+                                </form>
+
+                                <div class="text-center my-3 text-muted">Veya</div>
+
+                                <div class="d-grid gap-2">
+                                    <a href="/login/sso" class="btn btn-success btn-lg">SSO ile Giriş Yap (SAML)</a>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <a href="/" class="text-decoration-none">Ana Sayfaya Dön</a>
+                                </div>
+
+                                <footer class="text-center mt-3 text-muted small">
+                                    <p class="mb-1">Created by <strong>Ömer Mert Kaya</strong> <span
+                                            class="badge bg-light text-secondary border">IAM Engineer</span></p>
+                                    <a href="https://omermertkaya.github.io" target="_blank"
+                                        class="text-decoration-none">omermertkaya.github.io</a>
+                                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

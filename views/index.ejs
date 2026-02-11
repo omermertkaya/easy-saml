@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="bg-light">
+    <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
+        <div class="card shadow p-4 text-center" style="max-width: 600px; width: 100%;">
+            <div class="card-body">
+                <div class="text-center mb-4 text-primary">
+                    <i class="bi bi-shield-lock-fill display-2"></i>
+                    <h2 class="fw-bold mt-2">IAMERT SAML</h2>
+                </div>
+                <h4 class="text-secondary mb-4">
+                    <%= title %>
+                </h4>
+
+                <% if (locals.message) { %>
+                    <p class="lead text-muted">
+                        <%= message %>
+                    </p>
+                    <% } %>
+
+                        <p class="card-text">Node.js, Express ve EJS ile oluşturulmuş, SAML ve Yerel Kimlik Doğrulama
+                            içeren eğitim platformu.</p>
+
+                        <div class="d-grid gap-2 col-8 mx-auto mt-4">
+                            <% if (locals.user) { %>
+                                <div class="alert alert-success" role="alert">
+                                    Hoşgeldin, <strong>
+                                        <%= user.username %>
+                                    </strong>!
+                                </div>
+                                <a href="/dashboard" class="btn btn-primary btn-lg">Dashboard</a>
+                                <a href="/logout" class="btn btn-outline-danger">Çıkış Yap</a>
+                                <% } else { %>
+                                    <a href="/login" class="btn btn-primary btn-lg">Giriş Yap</a>
+                                    <% } %>
+                                        <a href="/glossary" class="btn btn-outline-secondary">SAML Sözlüğü</a>
+                        </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-5 text-muted">
+            <p class="mb-1">Created by <strong>Ömer Mert Kaya</strong></p>
+            <span class="badge bg-secondary mb-2">IAM Engineer</span><br>
+            <a href="https://omermertkaya.github.io" target="_blank" class="text-decoration-none text-primary small">
+                omermertkaya.github.io
+            </a>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
