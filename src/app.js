@@ -17,6 +17,12 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.urlencoded({ extended: true })); // For parsing form data
 app.use(express.json());
 
+// DEBUG: Log all requests to see what the IdP is sending
+app.use((req, res, next) => {
+    console.log(`[REQUEST] ${req.method} ${req.url}`);
+    next();
+});
+
 // Session Configuration (Required for Passport)
 app.use(session({
     secret: 'bu_gizli_anahtar_degistirilmeli', // Change this in production
@@ -292,6 +298,19 @@ app.post('/login', passport.authenticate('local', {
 
 // Login Process (SAML Trigger)
 app.get('/login/sso', (req, res, next) => {
+    // LOOP DETECTION: Check if IdP is redirecting back here with a response
+    if (req.query.SAMLResponse || req.body.SAMLResponse) {
+        console.error('[CRITICAL] SAMLResponse detected at /login/sso! This indicates an IdP configuration error.');
+        console.error('The IdP ACS URL is likely set to /login/sso instead of /login/sso/callback');
+        return res.status(400).send(`
+            <h1>Configuration Error Detected</h1>
+            <p>The Identity Provider (IdP) sent the SAML Response to <code>/login/sso</code>.</p>
+            <p>This page is for <b>starting</b> login, not receiving the result.</p>
+            <p><b>Solution:</b> Change your IdP's ACS (Assertion Consumer Service) URL to:</p>
+            <pre>${req.protocol}://${req.get('host')}/login/sso/callback</pre>
+        `);
+    }
+
     // Start fresh log for new flow
     global.samlEvents = [];
     addSamlEvent('SP', 'Flow Started', 'Kullanıcı SSO giriş işlemini başlattı (Discovery).');
