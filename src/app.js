@@ -459,8 +459,29 @@ app.post('/login/sso/callback',
                 global.recentSamlResponseXML = req.session.samlResponseXML; // Fallback
 
                 addSamlEvent('SP', 'XML Decoded', 'SAML Response XML formatına çözüldü.');
+
+                // --- IdP Status Analysis ---
+                const xml = req.session.samlResponseXML;
+
+                // Extract StatusCode
+                // Look for <samlp:StatusCode Value="..."> or <StatusCode Value="...">
+                const statusCodeMatch = xml.match(/StatusCode\s+Value=["']([^"']+)["']/);
+                if (statusCodeMatch && statusCodeMatch[1]) {
+                    const fullStatus = statusCodeMatch[1];
+                    const statusShort = fullStatus.split(':').pop(); // e.g. 'Success' from '...:status:Success'
+                    addSamlEvent('IdP', 'Login Status', `IdP Kararı: ${statusShort}`, { fullStatus: fullStatus });
+                }
+
+                // Extract StatusMessage (Optional)
+                const statusMsgMatch = xml.match(/StatusMessage>([^<]+)</);
+                if (statusMsgMatch && statusMsgMatch[1]) {
+                    addSamlEvent('IdP', 'Status Message', `IdP Mesajı: ${statusMsgMatch[1]}`);
+                }
+                // ---------------------------
+
             } catch (e) {
                 console.error('Error capturing SAMLResponse:', e);
+                addSamlEvent('System', 'Error', 'SAML Response işlenirken hata oluştu.', { error: e.message });
             }
         }
 
