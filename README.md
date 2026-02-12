@@ -44,6 +44,8 @@ Uygulama `http://localhost:3000` adresinde çalışmaya başlayacaktır.
 # Bağımlılıkları yükleyin
 npm install
 
+cd src
+
 # Uygulamayı başlatın
 npm run dev
 # veya
