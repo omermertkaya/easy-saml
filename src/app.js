@@ -138,7 +138,33 @@ function saveSamlConfig(config) {
 let samlConfig = loadSamlConfig();
 
 // --- SAML Event Log System (Educational) ---
-global.samlEvents = [];
+// --- SAML Event Log System (Persistent) ---
+const eventsLogPath = path.join(__dirname, '../saml-events.json');
+
+// Helper to load events from file
+function loadSamlEvents() {
+    try {
+        if (fs.existsSync(eventsLogPath)) {
+            const data = fs.readFileSync(eventsLogPath, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        console.error('Error loading SAML events:', e);
+    }
+    return [];
+}
+
+// Helper to save events to file
+function saveSamlEvents(events) {
+    try {
+        fs.writeFileSync(eventsLogPath, JSON.stringify(events, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Error saving SAML events:', e);
+    }
+}
+
+// Initial load into global for quick access (optional, but good for read perf)
+global.samlEvents = loadSamlEvents();
 
 function addSamlEvent(stage, title, message, data = null) {
     const event = {
@@ -149,9 +175,23 @@ function addSamlEvent(stage, title, message, data = null) {
         message: message,
         data: data
     };
-    global.samlEvents.push(event);
-    // Keep logs manageable
-    if (global.samlEvents.length > 50) global.samlEvents.shift();
+
+    // Load current state (in case of multiple processes, though node is single thread here)
+    let currentEvents = loadSamlEvents();
+
+    // Prepend new event (Newest First)
+    currentEvents.unshift(event);
+
+    // Keep logs manageable (Limit to last 200 events)
+    if (currentEvents.length > 200) {
+        currentEvents = currentEvents.slice(0, 200);
+    }
+
+    // Save back to file
+    saveSamlEvents(currentEvents);
+
+    // Update memory
+    global.samlEvents = currentEvents;
 }
 // -------------------------------------------
 
@@ -297,6 +337,49 @@ app.post('/login', passport.authenticate('local', {
 }));
 
 // Login Process (SAML Trigger)
+// ----------------------------------------------------------------------------------
+// REQUIRED CONFIGURATION:
+//   ACS URL / Callback URL (Identity Provider Setting):
+//     {{BASE_URL}}/login/sso/callback
+//
+//     Example: http://localhost:3000/login/sso/callback
+//     Example: https://your-domain.com/login/sso/callback
+// ----------------------------------------------------------------------------------
+
+// POST Handler: Catch incorrect IdP POSTs to /login/sso
+app.post('/login/sso', (req, res) => {
+    // If IdP sends SAMLResponse here (HTTP-POST Binding), it's a wrong configuration
+    if (req.body && req.body.SAMLResponse) {
+        // Helpful info for debugging
+        const correctUrl = `${req.protocol}://${req.get('host')}/login/sso/callback`;
+
+        console.error('--------------------------------------------------');
+        console.error('[CRITICAL CONFIG ERROR] IdP sent response to /login/sso!');
+        console.error(`Expected (Correct) ACS URL: ${correctUrl}`);
+        console.error('--------------------------------------------------');
+
+        return res.status(400).send(`
+            <div style="font-family: sans-serif; padding: 20px; text-align: center;">
+                <h1 style="color: #e74c3c;">⚠️ Configuration Error Detected</h1>
+                <p>The Identity Provider (IdP) is sending the SAML Response to the wrong URL.</p>
+                
+                <div style="background: #e8f5e9; padding: 15px; border: 2px solid #4caf50; border-radius: 5px; margin: 20px auto; max-width: 600px;">
+                    <h3 style="color: #2e7d32; margin-top: 0;">✅ CORRECT SETTING (Update your IdP):</h3>
+                    <p style="font-size: 1.2em; font-weight: bold;">ACS URL / Callback URL:</p>
+                    <code style="background: #fff; padding: 10px; display: block; border: 1px solid #ccc;">${correctUrl}</code>
+                </div>
+
+                <div style="background: #ffebee; padding: 10px; border-radius: 5px; margin: 20px auto; max-width: 600px; text-align: left;">
+                    <p><strong>Diagnosis:</strong> Your IdP is currently sending data to <code>.../login/sso</code> instead of <code>.../login/sso/callback</code>.</p>
+                </div>
+            </div>
+        `);
+    }
+    // Default 404 behavior for other POSTs
+    res.status(404).send('Cannot POST /login/sso. This endpoint only supports GET to initiate login.');
+});
+
+// GET Handler: Initiate Login
 app.get('/login/sso', (req, res, next) => {
     // LOOP DETECTION: Check if IdP is redirecting back here with a response
     // Safely check properties to avoid 'undefined' errors
@@ -313,8 +396,9 @@ app.get('/login/sso', (req, res, next) => {
         `);
     }
 
-    // Start fresh log for new flow
-    global.samlEvents = [];
+    // Start fresh log for new flow? 
+    // No, for persistent log we want to keep history.
+    // But we might want to mark the start of a flow clearly.
     addSamlEvent('SP', 'Flow Started', 'Kullanıcı SSO giriş işlemini başlattı (Discovery).');
 
     // Intercept redirect to capture SAMLRequest
@@ -436,8 +520,17 @@ app.get('/admin', (req, res) => {
         title: 'SAML Yönetim Paneli',
         config: samlConfig,
         user: req.user,
-        message: req.query.success ? 'Ayarlar başarıyla kaydedildi!' : null
+        message: req.query.success ? 'Ayarlar başarıyla kaydedildi!' : null,
+        events: global.samlEvents || []
     });
+});
+
+// API Endpoint for Live Events (Accessible to all authenticated users)
+app.get('/api/events', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(403).json({ error: 'Erişim reddedildi' });
+    }
+    res.json(global.samlEvents || []);
 });
 
 // Save Configuration Route - Advanced

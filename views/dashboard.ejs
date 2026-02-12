@@ -354,54 +354,80 @@
                             <div
                                 class="card-header bg-white pt-4 pb-2 d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h4 class="fw-bold text-warning"><i class="bi bi-activity me-2"></i>Olay Günlüğü
-                                        (Live Events)</h4>
-                                    <p class="text-muted small mb-0">SAML akışının adım adım işlem kayıtları.</p>
+                                    <h5 class="fw-bold text-dark mb-0"><i
+                                            class="bi bi-activity me-2 text-primary"></i>SAML Olay Günlüğü</h5>
+                                    <p class="text-muted small mb-0">Son 200 işlem kaydı.</p>
                                 </div>
-                                <span class="badge bg-light text-dark border">
-                                    <%= events.length %> Olay
-                                </span>
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check form-switch me-3">
+                                        <input class="form-check-input" type="checkbox" id="autoRefreshToggle">
+                                        <label class="form-check-label small" for="autoRefreshToggle">Otomatik</label>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" id="refreshBtn"><i
+                                            class="bi bi-arrow-clockwise me-1"></i>Yenile</button>
+                                </div>
                             </div>
                             <div class="card-body p-0">
-                                <div class="list-group list-group-flush">
-                                    <% if (events && events.length> 0) { %>
-                                        <% events.slice().reverse().forEach(function(event) { %>
-                                            <div class="list-group-item px-4 py-3">
-                                                <div
-                                                    class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                                    <h6
-                                                        class="mb-0 fw-bold <%= event.stage === 'SP' ? 'text-primary' : (event.stage === 'IdP' ? 'text-warning' : 'text-secondary') %>">
-                                                        [<%= event.stage %>] <%= event.title %>
-                                                    </h6>
-                                                    <small class="text-muted font-monospace">
-                                                        <%= new Date(event.timestamp).toLocaleTimeString() %>
-                                                    </small>
-                                                </div>
-                                                <p class="mb-1 small text-dark">
-                                                    <%= event.message %>
-                                                </p>
-                                                <% if (event.data) { %>
-                                                    <div class="mt-2">
-                                                        <button class="btn btn-xs btn-outline-secondary p-0 px-2"
-                                                            type="button" data-bs-toggle="collapse"
-                                                            data-bs-target="#eventData<%= event.id %>"
-                                                            aria-expanded="false">
-                                                            <i class="bi bi-code"></i> Detay
-                                                        </button>
-                                                        <div class="collapse mt-1" id="eventData<%= event.id %>">
-                                                            <pre
-                                                                class="bg-light p-2 border rounded small mb-0"><code><%= JSON.stringify(event.data, null, 2) %></code></pre>
-                                                        </div>
-                                                    </div>
-                                                    <% } %>
-                                            </div>
-                                            <% }); %>
-                                                <% } else { %>
-                                                    <div class="p-4 text-center text-muted">
-                                                        <i class="bi bi-hourglass-split fs-4 d-block mb-2"></i>
-                                                        Henüz bir olay kaydedilmedi.
-                                                    </div>
-                                                    <% } %>
+                                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                    <table class="table table-hover table-striped mb-0 small align-middle">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th style="width: 160px;">Zaman</th>
+                                                <th style="width: 80px;">Aşama</th>
+                                                <th style="width: 200px;">Olay</th>
+                                                <th>Detay</th>
+                                                <th style="width: 50px;">Veri</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="eventsTableBody">
+                                            <% if (locals.events && events.length> 0) { %>
+                                                <% events.forEach(event=> { %>
+                                                    <tr>
+                                                        <td class="text-nowrap text-muted">
+                                                            <%= new Date(event.timestamp).toLocaleString('tr-TR') %>
+                                                        </td>
+                                                        <td><span
+                                                                class="badge rounded-pill bg-<%= event.stage === 'SP' ? 'info' : (event.stage === 'IdP' ? 'warning' : 'secondary') %>">
+                                                                <%= event.stage %>
+                                                            </span></td>
+                                                        <td class="fw-bold text-dark">
+                                                            <%= event.title %>
+                                                        </td>
+                                                        <td class="text-muted">
+                                                            <%= event.message %>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <% if (event.data) { %>
+                                                                <a class="btn btn-link btn-sm p-0 text-secondary"
+                                                                    data-bs-toggle="collapse"
+                                                                    href="#event-<%= Math.floor(event.id) %>"
+                                                                    role="button" aria-expanded="false">
+                                                                    <i class="bi bi-file-earmark-code"></i>
+                                                                </a>
+                                                                <% } %>
+                                                        </td>
+                                                    </tr>
+                                                    <% if (event.data) { %>
+                                                        <tr class="collapse" id="event-<%= Math.floor(event.id) %>">
+                                                            <td colspan="5" class="bg-light p-3 border-bottom">
+                                                                <pre class="mb-0 small text-muted bg-white p-2 border rounded"
+                                                                    style="white-space: pre-wrap; font-size: 0.75rem;"><%= JSON.stringify(event.data, null, 2) %></pre>
+                                                            </td>
+                                                        </tr>
+                                                        <% } %>
+                                                            <% }); %>
+                                                                <% } else { %>
+                                                                    <tr>
+                                                                        <td colspan="5"
+                                                                            class="text-center text-muted py-5">
+                                                                            <i
+                                                                                class="bi bi-journal-x fs-1 d-block mb-2"></i>
+                                                                            Henüz kayıtlı olay yok.
+                                                                        </td>
+                                                                    </tr>
+                                                                    <% } %>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -533,6 +559,7 @@
             }
         }
     </script>
+    <script src="/js/script.js"></script>
 </body>
 
 </html>

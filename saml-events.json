@@ -1,0 +1,167 @@
+[
+  {
+    "id": 1770896825053.192,
+    "timestamp": "2026-02-12T11:47:05.053Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770896825052.2913,
+    "timestamp": "2026-02-12T11:47:05.052Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770896825028.483,
+    "timestamp": "2026-02-12T11:47:05.028Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770896825027.0225,
+    "timestamp": "2026-02-12T11:47:05.027Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770896822772.2441,
+    "timestamp": "2026-02-12T11:47:02.772Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770896442485.973,
+    "timestamp": "2026-02-12T11:40:42.485Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770896442485.626,
+    "timestamp": "2026-02-12T11:40:42.485Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770896442459.6628,
+    "timestamp": "2026-02-12T11:40:42.459Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770896442458.6208,
+    "timestamp": "2026-02-12T11:40:42.458Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770896439945.7153,
+    "timestamp": "2026-02-12T11:40:39.945Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770896183112.7231,
+    "timestamp": "2026-02-12T11:36:23.112Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770896183112.7668,
+    "timestamp": "2026-02-12T11:36:23.112Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770896183085.1655,
+    "timestamp": "2026-02-12T11:36:23.085Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770896183084.4656,
+    "timestamp": "2026-02-12T11:36:23.084Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770896180852.6326,
+    "timestamp": "2026-02-12T11:36:20.852Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  }
+]
