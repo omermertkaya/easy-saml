@@ -1,5 +1,615 @@
 [
   {
+    "id": 1770909405665.0776,
+    "timestamp": "2026-02-12T15:16:45.665Z",
+    "stage": "SP",
+    "title": "Permission Resolved",
+    "message": "Çözümlenen yetkiler: Yok",
+    "data": {
+      "permissions": [],
+      "roles": [
+        "SUPER_ADMIN",
+        "silme_grubu"
+      ]
+    }
+  },
+  {
+    "id": 1770909405664.6128,
+    "timestamp": "2026-02-12T15:16:45.664Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770909405664.9534,
+    "timestamp": "2026-02-12T15:16:45.664Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "groups",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770909405635.8215,
+    "timestamp": "2026-02-12T15:16:45.635Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770909405635.065,
+    "timestamp": "2026-02-12T15:16:45.635Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770909405633.6604,
+    "timestamp": "2026-02-12T15:16:45.633Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770909403221.3748,
+    "timestamp": "2026-02-12T15:16:43.221Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770908821035.9626,
+    "timestamp": "2026-02-12T15:07:01.035Z",
+    "stage": "SP",
+    "title": "Permission Resolved",
+    "message": "Çözümlenen yetkiler: Yok",
+    "data": {
+      "permissions": [],
+      "roles": [
+        "SUPER_ADMIN",
+        "silme_grubu"
+      ]
+    }
+  },
+  {
+    "id": 1770908821034.6104,
+    "timestamp": "2026-02-12T15:07:01.034Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770908821034.8271,
+    "timestamp": "2026-02-12T15:07:01.034Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "groups",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770908821008.4202,
+    "timestamp": "2026-02-12T15:07:01.008Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770908821007.4988,
+    "timestamp": "2026-02-12T15:07:01.007Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770908821006.173,
+    "timestamp": "2026-02-12T15:07:01.006Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770908817090.114,
+    "timestamp": "2026-02-12T15:06:57.090Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770908816165.1892,
+    "timestamp": "2026-02-12T15:06:56.165Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770908815115.5508,
+    "timestamp": "2026-02-12T15:06:55.115Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770908617991.2297,
+    "timestamp": "2026-02-12T15:03:37.991Z",
+    "stage": "SP",
+    "title": "Permission Resolved",
+    "message": "Çözümlenen yetkiler: Yok",
+    "data": {
+      "permissions": [],
+      "roles": [
+        "monopam_superadmin"
+      ]
+    }
+  },
+  {
+    "id": 1770908617991.976,
+    "timestamp": "2026-02-12T15:03:37.991Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770908617990.124,
+    "timestamp": "2026-02-12T15:03:37.990Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "groups",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770908617963.1853,
+    "timestamp": "2026-02-12T15:03:37.963Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770908617963.251,
+    "timestamp": "2026-02-12T15:03:37.963Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770908617962.498,
+    "timestamp": "2026-02-12T15:03:37.962Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770908609336.62,
+    "timestamp": "2026-02-12T15:03:29.336Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770908068544.0527,
+    "timestamp": "2026-02-12T14:54:28.544Z",
+    "stage": "SP",
+    "title": "Permission Resolved",
+    "message": "Çözümlenen yetkiler: Yok",
+    "data": {
+      "permissions": [],
+      "roles": []
+    }
+  },
+  {
+    "id": 1770908068544.03,
+    "timestamp": "2026-02-12T14:54:28.544Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770908068543.917,
+    "timestamp": "2026-02-12T14:54:28.543Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770908068515.948,
+    "timestamp": "2026-02-12T14:54:28.515Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770908068506.1035,
+    "timestamp": "2026-02-12T14:54:28.506Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770908068505.5435,
+    "timestamp": "2026-02-12T14:54:28.505Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770908066204.3257,
+    "timestamp": "2026-02-12T14:54:26.204Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770906390114.1538,
+    "timestamp": "2026-02-12T14:26:30.114Z",
+    "stage": "SP",
+    "title": "Permission Resolved",
+    "message": "Çözümlenen yetkiler: Yok",
+    "data": {
+      "permissions": [],
+      "roles": []
+    }
+  },
+  {
+    "id": 1770906390114.4429,
+    "timestamp": "2026-02-12T14:26:30.114Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770906390114.417,
+    "timestamp": "2026-02-12T14:26:30.114Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770906390088.195,
+    "timestamp": "2026-02-12T14:26:30.088Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770906390088.6006,
+    "timestamp": "2026-02-12T14:26:30.088Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770906390087.9414,
+    "timestamp": "2026-02-12T14:26:30.087Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770906386096.0579,
+    "timestamp": "2026-02-12T14:26:26.096Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770904394185.0618,
+    "timestamp": "2026-02-12T13:53:14.185Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770904394185.8577,
+    "timestamp": "2026-02-12T13:53:14.185Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770904394161.8938,
+    "timestamp": "2026-02-12T13:53:14.161Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770904394160.1663,
+    "timestamp": "2026-02-12T13:53:14.160Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770904394159.5706,
+    "timestamp": "2026-02-12T13:53:14.159Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770904391703.0918,
+    "timestamp": "2026-02-12T13:53:11.703Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770904389159.2202,
+    "timestamp": "2026-02-12T13:53:09.159Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770904389158.966,
+    "timestamp": "2026-02-12T13:53:09.158Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770904389133.1475,
+    "timestamp": "2026-02-12T13:53:09.133Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770904389133.0059,
+    "timestamp": "2026-02-12T13:53:09.133Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770904389131.9915,
+    "timestamp": "2026-02-12T13:53:09.131Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770904386736.7417,
+    "timestamp": "2026-02-12T13:53:06.736Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770904385132.446,
+    "timestamp": "2026-02-12T13:53:05.132Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
+    "id": 1770904379418.016,
+    "timestamp": "2026-02-12T13:52:59.418Z",
+    "stage": "SP",
+    "title": "Attribute Mapping",
+    "message": "Kullanıcı özellikleri yerel modele eşleniyor.",
+    "data": null
+  },
+  {
+    "id": 1770904379418.5078,
+    "timestamp": "2026-02-12T13:52:59.418Z",
+    "stage": "SP",
+    "title": "Identity Verified",
+    "message": "IdP kimlik doğrulamasını başarıyla tamamladı.",
+    "data": {
+      "profileKeys": [
+        "issuer",
+        "inResponseTo",
+        "sessionIndex",
+        "nameID",
+        "nameIDFormat",
+        "nameQualifier",
+        "spNameQualifier",
+        "Email",
+        "attributes",
+        "getAssertionXml",
+        "getAssertion",
+        "getSamlResponseXml"
+      ]
+    }
+  },
+  {
+    "id": 1770904379393.322,
+    "timestamp": "2026-02-12T13:52:59.393Z",
+    "stage": "IdP",
+    "title": "Login Status",
+    "message": "IdP Kararı: Success",
+    "data": {
+      "fullStatus": "urn:oasis:names:tc:SAML:2.0:status:Success"
+    }
+  },
+  {
+    "id": 1770904379393.3657,
+    "timestamp": "2026-02-12T13:52:59.393Z",
+    "stage": "SP",
+    "title": "XML Decoded",
+    "message": "SAML Response XML formatına çözüldü.",
+    "data": null
+  },
+  {
+    "id": 1770904379391.2153,
+    "timestamp": "2026-02-12T13:52:59.391Z",
+    "stage": "SP",
+    "title": "SAML Response Received",
+    "message": "IdP'den yanıt döndü (Assertion Consumer Service).",
+    "data": null
+  },
+  {
+    "id": 1770904375810.5107,
+    "timestamp": "2026-02-12T13:52:55.810Z",
+    "stage": "SP",
+    "title": "Flow Started",
+    "message": "Kullanıcı SSO giriş işlemini başlattı (Discovery).",
+    "data": null
+  },
+  {
     "id": 1770903188687.986,
     "timestamp": "2026-02-12T13:33:08.687Z",
     "stage": "SP",

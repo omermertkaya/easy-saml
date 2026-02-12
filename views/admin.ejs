@@ -232,36 +232,209 @@
                                             </div>
                                         </div>
 
-                                        <!-- 4. Attribute Mapping -->
+                                        <!-- 4. Attribute Mapping (Extended) -->
                                         <div class="tab-pane fade" id="mapping" role="tabpanel"
                                             aria-labelledby="mapping-tab">
                                             <div class="alert alert-light border small">
                                                 <i class="bi bi-lightbulb me-2 text-warning"></i>
                                                 IdP'den dönen kullanıcı özelliklerini (attributes) uygulamamızdaki
-                                                alanlarla eşleştirin.
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="attr_email" class="form-label fw-bold">E-Posta Alanı
-                                                    (Email)</label>
-                                                <input type="text" class="form-control font-monospace" id="attr_email"
-                                                    name="attr_email"
-                                                    value="<%= config.attributeMapping ? config.attributeMapping.email : 'email' %>"
-                                                    placeholder="örn. email, User.Email, http://schemas.xmlsoap.org/..."
-                                                    required>
-                                                <div class="form-text">IdP'den gelen E-Posta bilgisinin anahtar adı
-                                                    (Case-insensitive).</div>
+                                                alanlarla eşleştirin. Ayrıca yetki kuralları tanımlayabilirsiniz.
                                             </div>
 
-                                            <div class="mb-3">
-                                                <label for="attr_username" class="form-label fw-bold">Kullanıcı Adı
-                                                    Alanı (Username)</label>
-                                                <input type="text" class="form-control font-monospace"
-                                                    id="attr_username" name="attr_username"
-                                                    value="<%= config.attributeMapping ? config.attributeMapping.username : 'uid' %>"
-                                                    placeholder="örn. uid, sAMAccountName, name" required>
-                                                <div class="form-text">IdP'den gelen Kullanıcı Adı bilgisinin anahtar
-                                                    adı.</div>
+                                            <h6 class="fw-bold text-secondary text-uppercase small mt-3 mb-3"><i
+                                                    class="bi bi-arrow-left-right me-1"></i>Attribute Eşleştirme</h6>
+
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label for="attr_email" class="form-label fw-bold small">E-Posta
+                                                        (Email)</label>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm font-monospace"
+                                                        id="attr_email" name="attr_email"
+                                                        value="<%= config.attributeMapping ? config.attributeMapping.email : 'email' %>"
+                                                        placeholder="email" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="attr_username"
+                                                        class="form-label fw-bold small">Kullanıcı Adı
+                                                        (Username)</label>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm font-monospace"
+                                                        id="attr_username" name="attr_username"
+                                                        value="<%= config.attributeMapping ? config.attributeMapping.username : 'uid' %>"
+                                                        placeholder="uid" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="attr_firstName" class="form-label fw-bold small">Ad
+                                                        (First Name)</label>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm font-monospace"
+                                                        id="attr_firstName" name="attr_firstName"
+                                                        value="<%= config.attributeMapping ? config.attributeMapping.firstName : 'givenName' %>"
+                                                        placeholder="givenName">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="attr_lastName" class="form-label fw-bold small">Soyad
+                                                        (Last Name)</label>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm font-monospace"
+                                                        id="attr_lastName" name="attr_lastName"
+                                                        value="<%= config.attributeMapping ? config.attributeMapping.lastName : 'surname' %>"
+                                                        placeholder="surname">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="attr_department"
+                                                        class="form-label fw-bold small">Departman (Department)</label>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm font-monospace"
+                                                        id="attr_department" name="attr_department"
+                                                        value="<%= config.attributeMapping ? config.attributeMapping.department : 'department' %>"
+                                                        placeholder="department">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="attr_roles" class="form-label fw-bold small">Roller /
+                                                        Gruplar (Roles)</label>
+                                                    <input type="text"
+                                                        class="form-control form-control-sm font-monospace"
+                                                        id="attr_roles" name="attr_roles"
+                                                        value="<%= config.attributeMapping ? config.attributeMapping.roles : 'groups' %>"
+                                                        placeholder="groups">
+                                                </div>
                                             </div>
+
+                                            <!-- Permission Rules -->
+                                            <hr class="my-4">
+                                            <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i
+                                                    class="bi bi-key me-1"></i>Yetki Kuralları (Permission Rules)</h6>
+                                            <p class="small text-muted mb-3">IdP'den gelen grup/rol değerlerini uygulama
+                                                yetkilerine eşleyin. Örn: IdP'deki "admin" grubu →
+                                                <code>SILME_BUTON_YETKISI</code>
+                                            </p>
+
+                                            <div class="mb-3">
+                                                <label for="perm_sourceAttribute"
+                                                    class="form-label fw-bold small">Kaynak Attribute (IdP)</label>
+                                                <input type="text" class="form-control form-control-sm font-monospace"
+                                                    id="perm_sourceAttribute" name="perm_sourceAttribute"
+                                                    value="<%= (config.permissions && config.permissions.sourceAttribute) ? config.permissions.sourceAttribute : 'groups' %>"
+                                                    placeholder="groups">
+                                                <div class="form-text">Yetkilerin kontrol edileceği IdP attribute adı.
+                                                </div>
+                                            </div>
+
+                                            <div id="permRulesContainer">
+                                                <% const permRules=(config.permissions && config.permissions.rules) ?
+                                                    config.permissions.rules : []; %>
+                                                    <% if (permRules.length> 0) { %>
+                                                        <% permRules.forEach((rule, idx)=> { %>
+                                                            <div class="row g-2 mb-2 perm-rule-row align-items-end">
+                                                                <div class="col-md-5">
+                                                                    <% if (idx===0) { %><label
+                                                                            class="form-label fw-bold small">IdP
+                                                                            Değeri</label>
+                                                                        <% } %>
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_idpValue"
+                                                                                value="<%= rule.idpValue %>"
+                                                                                placeholder="admin">
+                                                                </div>
+                                                                <div class="col-md-5">
+                                                                    <% if (idx===0) { %><label
+                                                                            class="form-label fw-bold small">Uygulama
+                                                                            Yetkisi</label>
+                                                                        <% } %>
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_permission"
+                                                                                value="<%= rule.permission %>"
+                                                                                placeholder="SILME_BUTON_YETKISI">
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <button type="button"
+                                                                        class="btn btn-outline-danger btn-sm w-100"
+                                                                        onclick="this.closest('.perm-rule-row').remove()"><i
+                                                                            class="bi bi-trash3"></i></button>
+                                                                </div>
+                                                            </div>
+                                                            <% }); %>
+                                                                <% } else { %>
+                                                                    <div
+                                                                        class="row g-2 mb-2 perm-rule-row align-items-end">
+                                                                        <div class="col-md-5">
+                                                                            <label class="form-label fw-bold small">IdP
+                                                                                Değeri</label>
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_idpValue" value="admin"
+                                                                                placeholder="admin">
+                                                                        </div>
+                                                                        <div class="col-md-5">
+                                                                            <label
+                                                                                class="form-label fw-bold small">Uygulama
+                                                                                Yetkisi</label>
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_permission"
+                                                                                value="SILME_BUTON_YETKISI"
+                                                                                placeholder="SILME_BUTON_YETKISI">
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <button type="button"
+                                                                                class="btn btn-outline-danger btn-sm w-100"
+                                                                                onclick="this.closest('.perm-rule-row').remove()"><i
+                                                                                    class="bi bi-trash3"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div
+                                                                        class="row g-2 mb-2 perm-rule-row align-items-end">
+                                                                        <div class="col-md-5">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_idpValue" value="admin"
+                                                                                placeholder="admin">
+                                                                        </div>
+                                                                        <div class="col-md-5">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_permission"
+                                                                                value="EKLEME_BUTON_YETKISI"
+                                                                                placeholder="EKLEME_BUTON_YETKISI">
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <button type="button"
+                                                                                class="btn btn-outline-danger btn-sm w-100"
+                                                                                onclick="this.closest('.perm-rule-row').remove()"><i
+                                                                                    class="bi bi-trash3"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div
+                                                                        class="row g-2 mb-2 perm-rule-row align-items-end">
+                                                                        <div class="col-md-5">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_idpValue" value="dev"
+                                                                                placeholder="dev">
+                                                                        </div>
+                                                                        <div class="col-md-5">
+                                                                            <input type="text"
+                                                                                class="form-control form-control-sm font-monospace"
+                                                                                name="perm_permission"
+                                                                                value="EKLEME_BUTON_YETKISI"
+                                                                                placeholder="EKLEME_BUTON_YETKISI">
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <button type="button"
+                                                                                class="btn btn-outline-danger btn-sm w-100"
+                                                                                onclick="this.closest('.perm-rule-row').remove()"><i
+                                                                                    class="bi bi-trash3"></i></button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } %>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-success btn-sm mt-2"
+                                                id="addPermRuleBtn"><i class="bi bi-plus-lg me-1"></i>Yeni Kural
+                                                Ekle</button>
                                         </div>
                                     </div>
 
@@ -279,6 +452,25 @@
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById('addPermRuleBtn').addEventListener('click', () => {
+                const container = document.getElementById('permRulesContainer');
+                const row = document.createElement('div');
+                row.className = 'row g-2 mb-2 perm-rule-row align-items-end';
+                row.innerHTML = `
+                    <div class="col-md-5">
+                        <input type="text" class="form-control form-control-sm font-monospace" name="perm_idpValue" placeholder="IdP değeri (ör: admin)">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" class="form-control form-control-sm font-monospace" name="perm_permission" placeholder="YETKI_ADI">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="this.closest('.perm-rule-row').remove()"><i class="bi bi-trash3"></i></button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        </script>
 </body>
 
 </html>

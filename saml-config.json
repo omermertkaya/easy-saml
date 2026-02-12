@@ -33,6 +33,27 @@
   },
   "attributeMapping": {
     "email": "email",
-    "username": "uid"
+    "username": "uid",
+    "firstName": "givenName",
+    "lastName": "surname",
+    "department": "department",
+    "roles": "groups"
+  },
+  "permissions": {
+    "sourceAttribute": "groups",
+    "rules": [
+      {
+        "idpValue": "admin",
+        "permission": "SILME_BUTON_YETKISI"
+      },
+      {
+        "idpValue": "admin",
+        "permission": "EKLEME_BUTON_YETKISI"
+      },
+      {
+        "idpValue": "dev",
+        "permission": "EKLEME_BUTON_YETKISI"
+      }
+    ]
   }
 }

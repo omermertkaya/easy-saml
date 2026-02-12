@@ -247,55 +247,90 @@ console.log('SAML Strategy Options (Final):', {
     authnRequestsSigned: strategyOptions.authnRequestsSigned
 });
 
+/**
+ * Shared SAML verify callback — handles full attribute mapping + permission resolution.
+ * Used both at startup and after config save.
+ */
+function samlVerifyCallback(profile, done) {
+    // Log Profile received
+    addSamlEvent('SP', 'Identity Verified', 'IdP kimlik doğrulamasını başarıyla tamamladı.', { profileKeys: Object.keys(profile) });
+
+    // Dynamic Attribute Mapping
+    addSamlEvent('SP', 'Attribute Mapping', 'Kullanıcı özellikleri yerel modele eşleniyor.');
+    const mapping = samlConfig.attributeMapping || {};
+
+    // Helper: find attribute case-insensitively in profile root or .attributes
+    const getAttribute = (key) => {
+        if (!key) return null;
+        // 1. Exact match in profile root
+        if (profile[key] !== undefined) return profile[key];
+        // 2. Case-insensitive in profile root
+        const lowerKey = key.toLowerCase();
+        let foundKey = Object.keys(profile).find(k => k.toLowerCase() === lowerKey);
+        if (foundKey) return profile[foundKey];
+        // 3. Search in profile.attributes (some IdPs nest attributes)
+        if (profile.attributes) {
+            if (profile.attributes[key] !== undefined) return profile.attributes[key];
+            foundKey = Object.keys(profile.attributes).find(k => k.toLowerCase() === lowerKey);
+            if (foundKey) return profile.attributes[foundKey];
+        }
+        return null;
+    };
+
+    // Map core fields
+    let email = getAttribute(mapping.email || 'email') || profile.email || profile.Email || 'saml@example.com';
+    let username = getAttribute(mapping.username || 'uid') || profile.nameID || profile.NameID || email || 'SAML User';
+    let firstName = getAttribute(mapping.firstName || 'givenName') || '';
+    let lastName = getAttribute(mapping.lastName || 'surname') || '';
+    let department = getAttribute(mapping.department || 'department') || '';
+    let roles = getAttribute(mapping.roles || 'groups') || [];
+
+    // Normalize roles to array
+    if (typeof roles === 'string') {
+        roles = roles.split(',').map(r => r.trim()).filter(Boolean);
+    }
+    if (!Array.isArray(roles)) roles = [String(roles)];
+
+    // --- Permission Resolution ---
+    const permissions = [];
+    const permConfig = samlConfig.permissions || {};
+    if (permConfig.rules && Array.isArray(permConfig.rules)) {
+        // Get the source attribute values for permission matching
+        let permSource = getAttribute(permConfig.sourceAttribute || 'groups') || [];
+        if (typeof permSource === 'string') {
+            permSource = permSource.split(',').map(r => r.trim()).filter(Boolean);
+        }
+        if (!Array.isArray(permSource)) permSource = [String(permSource)];
+
+        // Match rules
+        for (const rule of permConfig.rules) {
+            if (permSource.some(v => v.toLowerCase() === rule.idpValue.toLowerCase())) {
+                if (!permissions.includes(rule.permission)) {
+                    permissions.push(rule.permission);
+                }
+            }
+        }
+    }
+
+    addSamlEvent('SP', 'Permission Resolved', `Çözümlenen yetkiler: ${permissions.length > 0 ? permissions.join(', ') : 'Yok'}`, { permissions, roles });
+
+    const mappedProfile = { email, username, firstName, lastName, department, roles };
+
+    const user = {
+        id: profile.nameID || email || 'saml-user',
+        username: username,
+        email: email,
+        source: 'saml',
+        samlProfile: profile,
+        mappedProfile: mappedProfile,
+        permissions: permissions
+    };
+    return done(null, user);
+}
+
 passport.use('saml', new SamlStrategy(
     strategyOptions,
-    (profile, done) => {
-        // Log Profile received
-        addSamlEvent('SP', 'Identity Verified', 'IdP kimlik doğrulamasını başarıyla tamamladı.', { profileKeys: Object.keys(profile) });
-
-        // Dynamic Attribute Mapping
-        addSamlEvent('SP', 'Attribute Mapping', 'Kullanıcı özellikleri yerel modele eşleniyor.');
-        const emailKey = samlConfig.attributeMapping ? samlConfig.attributeMapping.email : 'email';
-        const usernameKey = samlConfig.attributeMapping ? samlConfig.attributeMapping.username : 'uid';
-
-        // Helper to find attribute case-insensitively or by exact key
-        const getAttribute = (obj, key) => {
-            if (!obj) return null;
-            // 1. Exact match
-            if (obj[key]) return obj[key];
-            // 2. Case-insensitive match (if simplified profile)
-            const lowerKey = key.toLowerCase();
-            const foundKey = Object.keys(obj).find(k => k.toLowerCase() === lowerKey);
-            if (foundKey) return obj[foundKey];
-            return null;
-        };
-
-        // Try to find email in profile root or attributes
-        let email = getAttribute(profile, emailKey) ||
-            (profile.attributes && getAttribute(profile.attributes, emailKey));
-
-        // Fallback to standard claims/hardcoded if not found via mapping
-        if (!email) {
-            email = profile.email || profile.Email || 'saml@example.com';
-        }
-
-        // Try to find username
-        let username = getAttribute(profile, usernameKey) ||
-            (profile.attributes && getAttribute(profile.attributes, usernameKey)) ||
-            profile.nameID ||
-            profile.NameID ||
-            email ||
-            'SAML User';
-
-        const user = {
-            id: profile.nameID || email || 'saml-user',
-            username: username,
-            email: email,
-            source: 'saml',
-            samlProfile: profile
-        };
-        return done(null, user);
-    }
+    samlVerifyCallback
 ));
 
 // --- Authentication Logic End ---
@@ -584,73 +619,40 @@ app.post('/admin/save-saml', (req, res) => {
         samlConfig.security.wantAssertionsSigned = req.body.sec_wantAssertionsSigned === 'on';
         samlConfig.security.signatureAlgorithm = req.body.sec_signatureAlgorithm || 'sha256';
 
-        // 4. Attribute Mapping
+        // 4. Attribute Mapping (Extended)
         samlConfig.attributeMapping = {
             email: req.body.attr_email || 'email',
-            username: req.body.attr_username || 'uid'
+            username: req.body.attr_username || 'uid',
+            firstName: req.body.attr_firstName || 'givenName',
+            lastName: req.body.attr_lastName || 'surname',
+            department: req.body.attr_department || 'department',
+            roles: req.body.attr_roles || 'groups'
         };
+
+        // 5. Permission Rules
+        const permSource = req.body.perm_sourceAttribute || 'groups';
+        const permIdpValues = Array.isArray(req.body.perm_idpValue) ? req.body.perm_idpValue : (req.body.perm_idpValue ? [req.body.perm_idpValue] : []);
+        const permNames = Array.isArray(req.body.perm_permission) ? req.body.perm_permission : (req.body.perm_permission ? [req.body.perm_permission] : []);
+        const rules = [];
+        for (let i = 0; i < permIdpValues.length; i++) {
+            const idpVal = (permIdpValues[i] || '').trim();
+            const permName = (permNames[i] || '').trim();
+            if (idpVal && permName) {
+                rules.push({ idpValue: idpVal, permission: permName });
+            }
+        }
+        samlConfig.permissions = { sourceAttribute: permSource, rules };
 
         // Persist
         if (!saveSamlConfig(samlConfig)) {
             return res.status(500).send('Ayarlar kaydedilirken bir hata oluştu.');
         }
 
-        // Re-Config Strategy
+        // Re-Config Strategy using shared callback
         passport.unuse('saml');
         const newOptions = mapConfigToStrategyOptions(samlConfig);
-
-        // Fix: explicit idpCert mapping for node-saml validation
         newOptions.idpCert = newOptions.cert;
-
-        // We must re-create the strategy with the verify callback
-        passport.use('saml', new SamlStrategy(newOptions, (profile, done) => {
-            // ... (Same callback logic - ideally extracted to a named function to avoid duplication)
-            // Log Profile received
-            addSamlEvent('SP', 'Identity Verified', 'IdP kimlik doğrulamasını başarıyla tamamladı.', { profileKeys: Object.keys(profile) });
-
-            // Dynamic Attribute Mapping
-            addSamlEvent('SP', 'Attribute Mapping', 'Kullanıcı özellikleri yerel modele eşleniyor.');
-            const emailKey = samlConfig.attributeMapping ? samlConfig.attributeMapping.email : 'email';
-            const usernameKey = samlConfig.attributeMapping ? samlConfig.attributeMapping.username : 'uid';
-
-            // Helper to find attribute case-insensitively or by exact key
-            const getAttribute = (obj, key) => {
-                if (!obj) return null;
-                // 1. Exact match
-                if (obj[key]) return obj[key];
-                // 2. Case-insensitive match (if simplified profile)
-                const lowerKey = key.toLowerCase();
-                const foundKey = Object.keys(obj).find(k => k.toLowerCase() === lowerKey);
-                if (foundKey) return obj[foundKey];
-                return null;
-            };
-
-            // Try to find email in profile root or attributes
-            let email = getAttribute(profile, emailKey) ||
-                (profile.attributes && getAttribute(profile.attributes, emailKey));
-
-            // Fallback to standard claims/hardcoded if not found via mapping
-            if (!email) {
-                email = profile.email || profile.Email || 'saml@example.com';
-            }
-
-            // Try to find username
-            let username = getAttribute(profile, usernameKey) ||
-                (profile.attributes && getAttribute(profile.attributes, usernameKey)) ||
-                profile.nameID ||
-                profile.NameID ||
-                email ||
-                'SAML User';
-
-            const user = {
-                id: profile.nameID || email || 'saml-user',
-                username: username,
-                email: email,
-                source: 'saml',
-                samlProfile: profile
-            };
-            return done(null, user);
-        }));
+        passport.use('saml', new SamlStrategy(newOptions, samlVerifyCallback));
 
         res.redirect('/admin?success=true');
 
@@ -706,7 +708,9 @@ app.get('/dashboard', (req, res) => {
     res.render('dashboard', {
         title: 'Dashboard',
         user: req.user,
-        events: global.samlEvents || []
+        events: global.samlEvents || [],
+        mappedProfile: req.user.mappedProfile || null,
+        permissions: req.user.permissions || []
     });
 });
 
