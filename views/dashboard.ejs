@@ -64,527 +64,644 @@
 
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                        <h4 class="card-title text-center text-primary"><i
-                                class="bi bi-person-circle display-4 d-block mb-3"></i>Profil Bilgileri</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                <div>
-                                    <i class="bi bi-person me-2 text-muted"></i>
-                                    <strong>Kullanıcı Adı</strong>
-                                </div>
-                                <span class="text-secondary">
-                                    <%= user.username %>
-                                </span>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                <div>
-                                    <i class="bi bi-envelope me-2 text-muted"></i>
-                                    <strong>E-Posta</strong>
-                                </div>
-                                <span class="text-secondary">
-                                    <%= user.email %>
-                                </span>
-                            </div>
-                            <% if (user.source) { %>
-                                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                    <div>
-                                        <i class="bi bi-hdd-network me-2 text-muted"></i>
-                                        <strong>Giriş Tipi</strong>
-                                    </div>
-                                    <span class="badge bg-info text-dark text-uppercase">
-                                        <%= user.source %>
-                                    </span>
-                                </div>
-                                <% } %>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-light text-center py-3">
-                        <a href="/" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-left me-1"></i>Ana
-                            Sayfaya Dön</a>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Mapped Profile (visible for SAML users with mappedProfile data) -->
-            <% if (locals.mappedProfile && mappedProfile) { %>
-                <div class="col-md-8 mt-4">
-                    <div class="card shadow-sm border-0 border-top border-4 border-success">
+            <!-- Task Progress Section -->
+            <% if (locals.tasks && tasks.length> 0) { %>
+                <div class="col-md-8 mb-4">
+                    <div class="card shadow-sm border-0 border-start border-4 border-primary">
                         <div class="card-header bg-white pt-4 pb-2">
-                            <h5 class="fw-bold text-success mb-0"><i
-                                    class="bi bi-person-lines-fill me-2"></i>Eşleştirilmiş Profil</h5>
-                            <p class="text-muted small mb-0">Admin panelindeki attribute eşleştirme kurallarına göre
-                                çözümlenen kullanıcı bilgileri.</p>
+                            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-list-check me-2 text-primary"></i>Eğitim
+                                Durumu</h5>
+                            <p class="text-muted small mb-0">SAML entegrasyonu eğitim adımları.</p>
                         </div>
                         <div class="card-body p-0">
-                            <table class="table table-hover mb-0 small align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 35%;">Uygulama Alanı</th>
-                                        <th>Değer</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="fw-bold"><i class="bi bi-person me-1 text-muted"></i> Kullanıcı Adı
-                                        </td>
-                                        <td class="font-monospace">
-                                            <%= mappedProfile.username || '-' %>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold"><i class="bi bi-envelope me-1 text-muted"></i> E-Posta</td>
-                                        <td class="font-monospace">
-                                            <%= mappedProfile.email || '-' %>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold"><i class="bi bi-type me-1 text-muted"></i> Ad</td>
-                                        <td class="font-monospace">
-                                            <%= mappedProfile.firstName || '-' %>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold"><i class="bi bi-type-bold me-1 text-muted"></i> Soyad</td>
-                                        <td class="font-monospace">
-                                            <%= mappedProfile.lastName || '-' %>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold"><i class="bi bi-building me-1 text-muted"></i> Departman
-                                        </td>
-                                        <td class="font-monospace">
-                                            <%= mappedProfile.department || '-' %>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold"><i class="bi bi-people me-1 text-muted"></i> Roller</td>
-                                        <td>
-                                            <% if (mappedProfile.roles && mappedProfile.roles.length> 0) { %>
-                                                <% mappedProfile.roles.forEach(role=> { %>
-                                                    <span class="badge bg-primary me-1">
-                                                        <%= role %>
-                                                    </span>
-                                                    <% }); %>
-                                                        <% } else { %>
-                                                            <span class="text-muted">-</span>
-                                                            <% } %>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="list-group list-group-flush">
+                                <% tasks.forEach(task=> { %>
+                                    <div
+                                        class="list-group-item py-3 d-flex align-items-start <%= task.completed ? 'bg-light' : '' %>">
+                                        <div class="me-3 mt-1">
+                                            <% if (task.completed) { %>
+                                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                                <% } else { %>
+                                                    <i class="bi bi-circle text-muted fs-4"></i>
+                                                    <% } %>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6
+                                                    class="fw-bold mb-1 <%= task.completed ? 'text-decoration-line-through text-muted' : 'text-dark' %>">
+                                                    <%= task.title %>
+                                                </h6>
+                                                <% if (task.completed) { %>
+                                                    <span
+                                                        class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Tamamlandı</span>
+                                                    <% } else { %>
+                                                        <span
+                                                            class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">Bekliyor</span>
+                                                        <% } %>
+                                            </div>
+                                            <p
+                                                class="mb-0 small <%= task.completed ? 'text-muted' : 'text-secondary' %>">
+                                                <%= task.description %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <% }); %>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <% } %>
 
-                    <!-- Permission-Based Actions -->
-                    <% if (locals.permissions && permissions.length> 0) { %>
-                        <div class="col-md-8 mt-4">
-                            <div class="card shadow-sm border-0 border-top border-4 border-primary">
-                                <div class="card-header bg-white pt-4 pb-2">
-                                    <h5 class="fw-bold text-primary mb-0"><i class="bi bi-key-fill me-2"></i>Yetki
-                                        Tabanlı İşlemler</h5>
-                                    <p class="text-muted small mb-0">IdP'den gelen rollerinize göre aşağıdaki işlemler
-                                        etkinleştirilmiştir.</p>
-                                </div>
-                                <div class="card-body">
-                                    <div class="d-flex flex-wrap gap-2 mb-3">
-                                        <% permissions.forEach(perm=> { %>
-                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>
-                                                <%= perm %>
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                                <h4 class="card-title text-center text-primary"><i
+                                        class="bi bi-person-circle display-4 d-block mb-3"></i>Profil Bilgileri</h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="list-group list-group-flush">
+                                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                        <div>
+                                            <i class="bi bi-person me-2 text-muted"></i>
+                                            <strong>Kullanıcı Adı</strong>
+                                        </div>
+                                        <span class="text-secondary">
+                                            <%= user.username %>
+                                        </span>
+                                    </div>
+                                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                        <div>
+                                            <i class="bi bi-envelope me-2 text-muted"></i>
+                                            <strong>E-Posta</strong>
+                                        </div>
+                                        <span class="text-secondary">
+                                            <%= user.email %>
+                                        </span>
+                                    </div>
+                                    <% if (user.source) { %>
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                            <div>
+                                                <i class="bi bi-hdd-network me-2 text-muted"></i>
+                                                <strong>Giriş Tipi</strong>
+                                            </div>
+                                            <span class="badge bg-info text-dark text-uppercase">
+                                                <%= user.source %>
                                             </span>
-                                            <% }); %>
-                                    </div>
-                                    <hr>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <% if (permissions.includes('SILME_BUTON_YETKISI')) { %>
-                                            <button class="btn btn-danger" id="btnDelete"
-                                                onclick="alert('Silme işlemi gerçekleştirildi! (Demo)')">
-                                                <i class="bi bi-trash3 me-1"></i>Sil
-                                            </button>
-                                            <% } %>
-                                                <% if (permissions.includes('EKLEME_BUTON_YETKISI')) { %>
-                                                    <button class="btn btn-success" id="btnAdd"
-                                                        onclick="alert('Ekleme işlemi gerçekleştirildi! (Demo)')">
-                                                        <i class="bi bi-plus-lg me-1"></i>Ekle
-                                                    </button>
-                                                    <% } %>
-                                    </div>
+                                        </div>
+                                        <% } %>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light text-center py-3">
+                                <a href="/" class="btn btn-outline-primary btn-sm"><i
+                                        class="bi bi-arrow-left me-1"></i>Ana
+                                    Sayfaya Dön</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mapped Profile (visible for SAML users with mappedProfile data) -->
+                    <% if (locals.mappedProfile && mappedProfile) { %>
+                        <div class="col-md-8 mt-4">
+                            <div class="card shadow-sm border-0 border-top border-4 border-success">
+                                <div class="card-header bg-white pt-4 pb-2">
+                                    <h5 class="fw-bold text-success mb-0"><i
+                                            class="bi bi-person-lines-fill me-2"></i>Eşleştirilmiş Profil</h5>
+                                    <p class="text-muted small mb-0">Admin panelindeki attribute eşleştirme kurallarına
+                                        göre
+                                        çözümlenen kullanıcı bilgileri.</p>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table table-hover mb-0 small align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 35%;">Uygulama Alanı</th>
+                                                <th>Değer</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold"><i class="bi bi-person me-1 text-muted"></i>
+                                                    Kullanıcı Adı
+                                                </td>
+                                                <td class="font-monospace">
+                                                    <%= mappedProfile.username || '-' %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold"><i class="bi bi-envelope me-1 text-muted"></i>
+                                                    E-Posta</td>
+                                                <td class="font-monospace">
+                                                    <%= mappedProfile.email || '-' %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold"><i class="bi bi-type me-1 text-muted"></i> Ad</td>
+                                                <td class="font-monospace">
+                                                    <%= mappedProfile.firstName || '-' %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold"><i class="bi bi-type-bold me-1 text-muted"></i>
+                                                    Soyad</td>
+                                                <td class="font-monospace">
+                                                    <%= mappedProfile.lastName || '-' %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold"><i class="bi bi-building me-1 text-muted"></i>
+                                                    Departman
+                                                </td>
+                                                <td class="font-monospace">
+                                                    <%= mappedProfile.department || '-' %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold"><i class="bi bi-people me-1 text-muted"></i> Roller
+                                                </td>
+                                                <td>
+                                                    <% if (mappedProfile.roles && mappedProfile.roles.length> 0) { %>
+                                                        <% mappedProfile.roles.forEach(role=> { %>
+                                                            <span class="badge bg-primary me-1">
+                                                                <%= role %>
+                                                            </span>
+                                                            <% }); %>
+                                                                <% } else { %>
+                                                                    <span class="text-muted">-</span>
+                                                                    <% } %>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
                         <% } %>
 
-                            <!-- Eğitim Modu: SAML Akışı ve Detayları -->
-                            <% if (user.source==='saml' ) { %>
+                            <!-- Permission-Based Actions -->
+                            <% if (locals.permissions && permissions.length> 0) { %>
                                 <div class="col-md-8 mt-4">
-                                    <div class="card shadow-sm border-0 border-top border-4 border-info">
+                                    <div class="card shadow-sm border-0 border-top border-4 border-primary">
                                         <div class="card-header bg-white pt-4 pb-2">
-                                            <h4 class="fw-bold text-info"><i
-                                                    class="bi bi-mortarboard-fill me-2"></i>SAML Analizi</h4>
-                                            <p class="text-muted small">Bu oturum SAML protokolü kullanılarak
-                                                gerçekleşti. Aşağıdaki
-                                                detayları inceleyerek süreci öğrenebilirsiniz.</p>
+                                            <h5 class="fw-bold text-primary mb-0"><i
+                                                    class="bi bi-key-fill me-2"></i>Yetki
+                                                Tabanlı İşlemler</h5>
+                                            <p class="text-muted small mb-0">IdP'den gelen rollerinize göre aşağıdaki
+                                                işlemler
+                                                etkinleştirilmiştir.</p>
                                         </div>
                                         <div class="card-body">
-
-                                            <!-- Görsel Akış -->
-                                            <div class="mb-4 text-center d-none d-md-block">
-                                                <h6 class="text-uppercase text-muted fw-bold mb-3 ls-1">Kimlik Doğrulama
-                                                    Akışı</h6>
-                                                <div class="d-flex justify-content-between align-items-center px-4">
-                                                    <div class="text-center">
-                                                        <div class="badge bg-secondary p-3 rounded-circle mb-2"><i
-                                                                class="bi bi-pc-display fs-4"></i></div>
-                                                        <div class="fw-bold small">Kullanıcı (Browser)</div>
-                                                    </div>
-                                                    <div class="flex-grow-1 px-2 position-relative">
-                                                        <div class="progress" style="height: 2px;">
-                                                            <div class="progress-bar bg-success" role="progressbar"
-                                                                style="width: 100%">
-                                                            </div>
-                                                        </div>
-                                                        <span
-                                                            class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">1.
-                                                            Giriş İsteği</span>
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <div class="badge bg-primary p-3 rounded-circle mb-2"><i
-                                                                class="bi bi-server fs-4"></i></div>
-                                                        <div class="fw-bold small">Service Provider (Eğitim Uygulaması)
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-grow-1 px-2 position-relative">
-                                                        <div class="progress" style="height: 2px;">
-                                                            <div class="progress-bar bg-success" role="progressbar"
-                                                                style="width: 100%">
-                                                            </div>
-                                                        </div>
-                                                        <span
-                                                            class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">2.
-                                                            SAML Request</span>
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <div class="badge bg-warning text-dark p-3 rounded-circle mb-2">
-                                                            <i class="bi bi-shield-check fs-4"></i></div>
-                                                        <div class="fw-bold small">Identity Provider (IdP)</div>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-end align-items-center px-4 mt-3">
-                                                    <div class="flex-grow-1 px-5 position-relative">
-                                                        <div class="progress" style="height: 2px;">
-                                                            <div class="progress-bar bg-success" role="progressbar"
-                                                                style="width: 100%">
-                                                            </div>
-                                                        </div>
-                                                        <span
-                                                            class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">3.
-                                                            SAML Response (Assertion)</span>
-                                                    </div>
-                                                </div>
+                                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                                <% permissions.forEach(perm=> { %>
+                                                    <span class="badge bg-success"><i
+                                                            class="bi bi-check-circle me-1"></i>
+                                                        <%= perm %>
+                                                    </span>
+                                                    <% }); %>
                                             </div>
-
                                             <hr>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <% if (permissions.includes('SILME_BUTON_YETKISI')) { %>
+                                                    <button class="btn btn-danger" id="btnDelete"
+                                                        onclick="alert('Silme işlemi gerçekleştirildi! (Demo)')">
+                                                        <i class="bi bi-trash3 me-1"></i>Sil
+                                                    </button>
+                                                    <% } %>
+                                                        <% if (permissions.includes('EKLEME_BUTON_YETKISI')) { %>
+                                                            <button class="btn btn-success" id="btnAdd"
+                                                                onclick="alert('Ekleme işlemi gerçekleştirildi! (Demo)')">
+                                                                <i class="bi bi-plus-lg me-1"></i>Ekle
+                                                            </button>
+                                                            <% } %>
+                                                                <% if (permissions.includes('iammert_admin')) { %>
+                                                                    <a href="/admin" class="btn btn-dark">
+                                                                        <i class="bi bi-gear-fill me-1"></i>Admin Paneli
+                                                                    </a>
+                                                                    <% } %>
+                                                                        <% if (permissions.includes('iammert_sozluk')) {
+                                                                            %>
+                                                                            <a href="/sozluk"
+                                                                                class="btn btn-info text-white">
+                                                                                <i
+                                                                                    class="bi bi-book-half me-1"></i>Kurumsal
+                                                                                Sözlük
+                                                                            </a>
+                                                                            <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
 
-                                            <!-- Gelen Veriler -->
-                                            <h6 class="text-uppercase text-muted fw-bold mb-3 mt-4 ls-1">SAML Mesajları
-                                                ve Profili</h6>
+                                    <!-- Eğitim Modu: SAML Akışı ve Detayları -->
+                                    <% if (user.source==='saml' ) { %>
+                                        <div class="col-md-8 mt-4">
+                                            <div class="card shadow-sm border-0 border-top border-4 border-info">
+                                                <div class="card-header bg-white pt-4 pb-2">
+                                                    <h4 class="fw-bold text-info"><i
+                                                            class="bi bi-mortarboard-fill me-2"></i>SAML Analizi</h4>
+                                                    <p class="text-muted small">Bu oturum SAML protokolü kullanılarak
+                                                        gerçekleşti. Aşağıdaki
+                                                        detayları inceleyerek süreci öğrenebilirsiniz.</p>
+                                                </div>
+                                                <div class="card-body">
 
-                                            <div class="accordion" id="accordionSaml">
-
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingRequest">
-                                                        <button class="accordion-button collapsed" type="button"
-                                                            data-bs-toggle="collapse" data-bs-target="#collapseRequest"
-                                                            aria-expanded="false" aria-controls="collapseRequest">
-                                                            <i class="bi bi-arrow-right-circle me-2 text-warning"></i>
-                                                            SAML İsteği (XML)
-                                                            - (SP -> IdP)
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseRequest" class="accordion-collapse collapse"
-                                                        aria-labelledby="headingRequest"
-                                                        data-bs-parent="#accordionSaml">
-                                                        <div class="accordion-body bg-light">
-                                                            <% if (user.samlRequestXML) { %>
-                                                                <div class="xml-container">
-                                                                    <button class="btn btn-sm btn-light border btn-copy"
-                                                                        onclick="copyToClipboard('reqXmlCode', this)">
-                                                                        <i class="bi bi-clipboard"></i> Kopyala
-                                                                    </button>
-                                                                    <pre class="mb-0 rounded"
-                                                                        style="max-height: 400px; overflow-y: auto;"><code id="reqXmlCode" class="language-xml small"><%= user.samlRequestXML %></code></pre>
+                                                    <!-- Görsel Akış -->
+                                                    <div class="mb-4 text-center d-none d-md-block">
+                                                        <h6 class="text-uppercase text-muted fw-bold mb-3 ls-1">Kimlik
+                                                            Doğrulama
+                                                            Akışı</h6>
+                                                        <div
+                                                            class="d-flex justify-content-between align-items-center px-4">
+                                                            <div class="text-center">
+                                                                <div class="badge bg-secondary p-3 rounded-circle mb-2">
+                                                                    <i class="bi bi-pc-display fs-4"></i>
                                                                 </div>
-                                                                <div class="mt-2 small text-muted">
-                                                                    <i class="bi bi-info-circle me-1"></i> Bu XML, giriş
-                                                                    yaparken
-                                                                    Identity Provider'a gönderilen
-                                                                    <code>AuthnRequest</code> mesajıdır.
+                                                                <div class="fw-bold small">Kullanıcı (Browser)</div>
+                                                            </div>
+                                                            <div class="flex-grow-1 px-2 position-relative">
+                                                                <div class="progress" style="height: 2px;">
+                                                                    <div class="progress-bar bg-success"
+                                                                        role="progressbar" style="width: 100%">
+                                                                    </div>
                                                                 </div>
+                                                                <span
+                                                                    class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">1.
+                                                                    Giriş İsteği</span>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <div class="badge bg-primary p-3 rounded-circle mb-2"><i
+                                                                        class="bi bi-server fs-4"></i></div>
+                                                                <div class="fw-bold small">Service Provider (Eğitim
+                                                                    Uygulaması)
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex-grow-1 px-2 position-relative">
+                                                                <div class="progress" style="height: 2px;">
+                                                                    <div class="progress-bar bg-success"
+                                                                        role="progressbar" style="width: 100%">
+                                                                    </div>
+                                                                </div>
+                                                                <span
+                                                                    class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">2.
+                                                                    SAML Request</span>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <div
+                                                                    class="badge bg-warning text-dark p-3 rounded-circle mb-2">
+                                                                    <i class="bi bi-shield-check fs-4"></i>
+                                                                </div>
+                                                                <div class="fw-bold small">Identity Provider (IdP)</div>
+                                                            </div>
+                                                        </div>
+                                                        <div
+                                                            class="d-flex justify-content-end align-items-center px-4 mt-3">
+                                                            <div class="flex-grow-1 px-5 position-relative">
+                                                                <div class="progress" style="height: 2px;">
+                                                                    <div class="progress-bar bg-success"
+                                                                        role="progressbar" style="width: 100%">
+                                                                    </div>
+                                                                </div>
+                                                                <span
+                                                                    class="position-absolute top-0 start-50 translate-middle badge bg-white text-success border border-success mt-2">3.
+                                                                    SAML Response (Assertion)</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                                                <!-- Request Detay Tablosu (JS ile doldurulur) -->
-                                                                <div class="mt-3">
-                                                                    <h6
-                                                                        class="small fw-bold text-muted border-bottom pb-1">
-                                                                        İstek
-                                                                        Detayları (Parsed)</h6>
+                                                    <hr>
+
+                                                    <!-- Gelen Veriler -->
+                                                    <h6 class="text-uppercase text-muted fw-bold mb-3 mt-4 ls-1">SAML
+                                                        Mesajları
+                                                        ve Profili</h6>
+
+                                                    <div class="accordion" id="accordionSaml">
+
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="headingRequest">
+                                                                <button class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#collapseRequest"
+                                                                    aria-expanded="false"
+                                                                    aria-controls="collapseRequest">
+                                                                    <i
+                                                                        class="bi bi-arrow-right-circle me-2 text-warning"></i>
+                                                                    SAML İsteği (XML)
+                                                                    - (SP -> IdP)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseRequest"
+                                                                class="accordion-collapse collapse"
+                                                                aria-labelledby="headingRequest"
+                                                                data-bs-parent="#accordionSaml">
+                                                                <div class="accordion-body bg-light">
+                                                                    <% if (user.samlRequestXML) { %>
+                                                                        <div class="xml-container">
+                                                                            <button
+                                                                                class="btn btn-sm btn-light border btn-copy"
+                                                                                onclick="copyToClipboard('reqXmlCode', this)">
+                                                                                <i class="bi bi-clipboard"></i> Kopyala
+                                                                            </button>
+                                                                            <pre class="mb-0 rounded"
+                                                                                style="max-height: 400px; overflow-y: auto;"><code id="reqXmlCode" class="language-xml small"><%= user.samlRequestXML %></code></pre>
+                                                                        </div>
+                                                                        <div class="mt-2 small text-muted">
+                                                                            <i class="bi bi-info-circle me-1"></i> Bu
+                                                                            XML, giriş
+                                                                            yaparken
+                                                                            Identity Provider'a gönderilen
+                                                                            <code>AuthnRequest</code> mesajıdır.
+                                                                        </div>
+
+                                                                        <!-- Request Detay Tablosu (JS ile doldurulur) -->
+                                                                        <div class="mt-3">
+                                                                            <h6
+                                                                                class="small fw-bold text-muted border-bottom pb-1">
+                                                                                İstek
+                                                                                Detayları (Parsed)</h6>
+                                                                            <table
+                                                                                class="table table-bordered table-sm small mb-0 bg-white">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td class="fw-bold text-muted"
+                                                                                            style="width: 30%">ID
+                                                                                        </td>
+                                                                                        <td id="reqId"
+                                                                                            class="font-monospace">-
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="fw-bold text-muted">
+                                                                                            Zaman
+                                                                                            (IssueInstant)</td>
+                                                                                        <td id="reqTime"
+                                                                                            class="font-monospace">
+                                                                                            -</td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="fw-bold text-muted">
+                                                                                            Hedef
+                                                                                            (Destination)</td>
+                                                                                        <td id="reqDest"
+                                                                                            class="font-monospace text-break">
+                                                                                            -
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="fw-bold text-muted">
+                                                                                            Gönderen
+                                                                                            (Issuer)</td>
+                                                                                        <td id="reqIssuer"
+                                                                                            class="font-monospace">-
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                        <% } else { %>
+                                                                            <div class="alert alert-warning mb-0 small">
+                                                                                SAML İsteği yakalanamadı. Lütfen tekrar
+                                                                                giriş
+                                                                                yapmayı deneyin.
+                                                                            </div>
+                                                                            <% } %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="headingResponse">
+                                                                <button class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#collapseResponse"
+                                                                    aria-expanded="false"
+                                                                    aria-controls="collapseResponse">
+                                                                    <i
+                                                                        class="bi bi-arrow-left-circle me-2 text-success"></i>
+                                                                    SAML Yanıtı (XML)
+                                                                    - (IdP -> SP)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseResponse"
+                                                                class="accordion-collapse collapse"
+                                                                aria-labelledby="headingResponse"
+                                                                data-bs-parent="#accordionSaml">
+                                                                <div class="accordion-body bg-light">
+                                                                    <% if (user.samlResponseXML) { %>
+                                                                        <div class="xml-container">
+                                                                            <button
+                                                                                class="btn btn-sm btn-light border btn-copy"
+                                                                                onclick="copyToClipboard('resXmlCode', this)">
+                                                                                <i class="bi bi-clipboard"></i> Kopyala
+                                                                            </button>
+                                                                            <pre class="mb-0 rounded"
+                                                                                style="max-height: 400px; overflow-y: auto;"><code id="resXmlCode" class="language-xml small"><%= user.samlResponseXML %></code></pre>
+                                                                        </div>
+                                                                        <div class="mt-2 small text-muted">
+                                                                            <i class="bi bi-info-circle me-1"></i> Bu
+                                                                            XML,
+                                                                            Identity Provider'dan
+                                                                            dönen ve kimlik doğrulama başarısını içeren
+                                                                            <code>Response</code>
+                                                                            mesajıdır.
+                                                                        </div>
+                                                                        <% } else { %>
+                                                                            <div class="alert alert-warning mb-0 small">
+                                                                                SAML Yanıtı yakalanamadı.
+                                                                            </div>
+                                                                            <% } %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="headingOne">
+                                                                <button class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#collapseOne" aria-expanded="false"
+                                                                    aria-controls="collapseOne">
+                                                                    <i class="bi bi-code-slash me-2 text-primary"></i>
+                                                                    Çözümlenmiş Profil (JSON)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseOne" class="accordion-collapse collapse"
+                                                                aria-labelledby="headingOne"
+                                                                data-bs-parent="#accordionSaml">
+                                                                <div class="accordion-body bg-light">
+                                                                    <pre class="mb-0"
+                                                                        style="max-height: 300px; overflow-y: auto;"><code class="small language-json"><%= JSON.stringify(user.samlProfile, null, 2) %></code></pre>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="headingTwo">
+                                                                <button class="accordion-button collapsed" type="button"
+                                                                    data-bs-toggle="collapse"
+                                                                    data-bs-target="#collapseTwo" aria-expanded="false"
+                                                                    aria-controls="collapseTwo">
+                                                                    <i
+                                                                        class="bi bi-file-earmark-code me-2 text-success"></i>
+                                                                    Anahtar SAML
+                                                                    Özellikleri
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseTwo" class="accordion-collapse collapse"
+                                                                aria-labelledby="headingTwo"
+                                                                data-bs-parent="#accordionSaml">
+                                                                <div class="accordion-body p-0">
                                                                     <table
-                                                                        class="table table-bordered table-sm small mb-0 bg-white">
+                                                                        class="table table-striped table-hover mb-0 small">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Özellik</th>
+                                                                                <th>Değer</th>
+                                                                                <th>Açıklama</th>
+                                                                            </tr>
+                                                                        </thead>
                                                                         <tbody>
                                                                             <tr>
-                                                                                <td class="fw-bold text-muted"
-                                                                                    style="width: 30%">ID
+                                                                                <td class="fw-bold">NameID</td>
+                                                                                <td class="text-break">
+                                                                                    <%= user.samlProfile.nameID || '-'
+                                                                                        %>
                                                                                 </td>
-                                                                                <td id="reqId" class="font-monospace">-
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="fw-bold text-muted">Zaman
-                                                                                    (IssueInstant)</td>
-                                                                                <td id="reqTime" class="font-monospace">
-                                                                                    -</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td class="fw-bold text-muted">Hedef
-                                                                                    (Destination)</td>
-                                                                                <td id="reqDest"
-                                                                                    class="font-monospace text-break">-
+                                                                                <td class="text-muted">Kullanıcının
+                                                                                    IdP'deki
+                                                                                    benzersiz kimliği.
                                                                                 </td>
                                                                             </tr>
                                                                             <tr>
-                                                                                <td class="fw-bold text-muted">Gönderen
-                                                                                    (Issuer)</td>
-                                                                                <td id="reqIssuer"
-                                                                                    class="font-monospace">-</td>
+                                                                                <td class="fw-bold">SessionIndex</td>
+                                                                                <td class="text-break">
+                                                                                    <%= user.samlProfile.sessionIndex
+                                                                                        || '-' %>
+                                                                                </td>
+                                                                                <td class="text-muted">Bu oturuma ait
+                                                                                    benzersiz
+                                                                                    token.</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="fw-bold">Email</td>
+                                                                                <td class="text-break">
+                                                                                    <%= user.email || '-' %>
+                                                                                </td>
+                                                                                <td class="text-muted">Kullanıcının
+                                                                                    IdP'deki
+                                                                                    benzersiz kimliği
+                                                                                    (Mapped).
+                                                                                </td>
                                                                             </tr>
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
-                                                                <% } else { %>
-                                                                    <div class="alert alert-warning mb-0 small">
-                                                                        SAML İsteği yakalanamadı. Lütfen tekrar giriş
-                                                                        yapmayı deneyin.
-                                                                    </div>
-                                                                    <% } %>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingResponse">
-                                                        <button class="accordion-button collapsed" type="button"
-                                                            data-bs-toggle="collapse" data-bs-target="#collapseResponse"
-                                                            aria-expanded="false" aria-controls="collapseResponse">
-                                                            <i class="bi bi-arrow-left-circle me-2 text-success"></i>
-                                                            SAML Yanıtı (XML)
-                                                            - (IdP -> SP)
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseResponse" class="accordion-collapse collapse"
-                                                        aria-labelledby="headingResponse"
-                                                        data-bs-parent="#accordionSaml">
-                                                        <div class="accordion-body bg-light">
-                                                            <% if (user.samlResponseXML) { %>
-                                                                <div class="xml-container">
-                                                                    <button class="btn btn-sm btn-light border btn-copy"
-                                                                        onclick="copyToClipboard('resXmlCode', this)">
-                                                                        <i class="bi bi-clipboard"></i> Kopyala
-                                                                    </button>
-                                                                    <pre class="mb-0 rounded"
-                                                                        style="max-height: 400px; overflow-y: auto;"><code id="resXmlCode" class="language-xml small"><%= user.samlResponseXML %></code></pre>
-                                                                </div>
-                                                                <div class="mt-2 small text-muted">
-                                                                    <i class="bi bi-info-circle me-1"></i> Bu XML,
-                                                                    Identity Provider'dan
-                                                                    dönen ve kimlik doğrulama başarısını içeren
-                                                                    <code>Response</code>
-                                                                    mesajıdır.
-                                                                </div>
-                                                                <% } else { %>
-                                                                    <div class="alert alert-warning mb-0 small">
-                                                                        SAML Yanıtı yakalanamadı.
-                                                                    </div>
-                                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <!-- Live Events Log -->
+                                            <div class="col-md-8 mt-4">
+                                                <div class="card shadow-sm border-0 border-top border-4 border-warning">
+                                                    <div
+                                                        class="card-header bg-white pt-4 pb-2 d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="fw-bold text-dark mb-0"><i
+                                                                    class="bi bi-activity me-2 text-primary"></i>SAML
+                                                                Olay
+                                                                Günlüğü</h5>
+                                                            <p class="text-muted small mb-0">Son 200 işlem kaydı.</p>
+                                                        </div>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="form-check form-switch me-3">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    id="autoRefreshToggle">
+                                                                <label class="form-check-label small"
+                                                                    for="autoRefreshToggle">Otomatik</label>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-outline-primary"
+                                                                id="refreshBtn"><i
+                                                                    class="bi bi-arrow-clockwise me-1"></i>Yenile</button>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingOne">
-                                                        <button class="accordion-button collapsed" type="button"
-                                                            data-bs-toggle="collapse" data-bs-target="#collapseOne"
-                                                            aria-expanded="false" aria-controls="collapseOne">
-                                                            <i class="bi bi-code-slash me-2 text-primary"></i>
-                                                            Çözümlenmiş Profil (JSON)
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseOne" class="accordion-collapse collapse"
-                                                        aria-labelledby="headingOne" data-bs-parent="#accordionSaml">
-                                                        <div class="accordion-body bg-light">
-                                                            <pre class="mb-0"
-                                                                style="max-height: 300px; overflow-y: auto;"><code class="small language-json"><%= JSON.stringify(user.samlProfile, null, 2) %></code></pre>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="accordion-item">
-                                                    <h2 class="accordion-header" id="headingTwo">
-                                                        <button class="accordion-button collapsed" type="button"
-                                                            data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-                                                            aria-expanded="false" aria-controls="collapseTwo">
-                                                            <i class="bi bi-file-earmark-code me-2 text-success"></i>
-                                                            Anahtar SAML
-                                                            Özellikleri
-                                                        </button>
-                                                    </h2>
-                                                    <div id="collapseTwo" class="accordion-collapse collapse"
-                                                        aria-labelledby="headingTwo" data-bs-parent="#accordionSaml">
-                                                        <div class="accordion-body p-0">
-                                                            <table class="table table-striped table-hover mb-0 small">
-                                                                <thead>
+                                                    <div class="card-body p-0">
+                                                        <div class="table-responsive"
+                                                            style="max-height: 500px; overflow-y: auto;">
+                                                            <table
+                                                                class="table table-hover table-striped mb-0 small align-middle">
+                                                                <thead class="table-light sticky-top">
                                                                     <tr>
-                                                                        <th>Özellik</th>
-                                                                        <th>Değer</th>
-                                                                        <th>Açıklama</th>
+                                                                        <th style="width: 160px;">Zaman</th>
+                                                                        <th style="width: 80px;">Aşama</th>
+                                                                        <th style="width: 200px;">Olay</th>
+                                                                        <th>Detay</th>
+                                                                        <th style="width: 50px;">Veri</th>
                                                                     </tr>
                                                                 </thead>
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td class="fw-bold">NameID</td>
-                                                                        <td class="text-break">
-                                                                            <%= user.samlProfile.nameID || '-' %>
-                                                                        </td>
-                                                                        <td class="text-muted">Kullanıcının IdP'deki
-                                                                            benzersiz kimliği.
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="fw-bold">SessionIndex</td>
-                                                                        <td class="text-break">
-                                                                            <%= user.samlProfile.sessionIndex || '-' %>
-                                                                        </td>
-                                                                        <td class="text-muted">Bu oturuma ait benzersiz
-                                                                            token.</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="fw-bold">Email</td>
-                                                                        <td class="text-break">
-                                                                            <%= user.email || '-' %>
-                                                                        </td>
-                                                                        <td class="text-muted">Kullanıcının IdP'deki
-                                                                            benzersiz kimliği
-                                                                            (Mapped).
-                                                                        </td>
-                                                                    </tr>
+                                                                <tbody id="eventsTableBody">
+                                                                    <% if (locals.events && events.length> 0) { %>
+                                                                        <% events.forEach(event=> { %>
+                                                                            <tr>
+                                                                                <td class="text-nowrap text-muted">
+                                                                                    <%= new
+                                                                                        Date(event.timestamp).toLocaleString('tr-TR')
+                                                                                        %>
+                                                                                </td>
+                                                                                <td><span
+                                                                                        class="badge rounded-pill bg-<%= event.stage === 'SP' ? 'info' : (event.stage === 'IdP' ? 'warning' : 'secondary') %>">
+                                                                                        <%= event.stage %>
+                                                                                    </span></td>
+                                                                                <td class="fw-bold text-dark">
+                                                                                    <%= event.title %>
+                                                                                </td>
+                                                                                <td class="text-muted">
+                                                                                    <%= event.message %>
+                                                                                </td>
+                                                                                <td class="text-center">
+                                                                                    <% if (event.data) { %>
+                                                                                        <a class="btn btn-link btn-sm p-0 text-secondary"
+                                                                                            data-bs-toggle="collapse"
+                                                                                            href="#event-<%= Math.floor(event.id) %>"
+                                                                                            role="button"
+                                                                                            aria-expanded="false">
+                                                                                            <i
+                                                                                                class="bi bi-file-earmark-code"></i>
+                                                                                        </a>
+                                                                                        <% } %>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <% if (event.data) { %>
+                                                                                <tr class="collapse"
+                                                                                    id="event-<%= Math.floor(event.id) %>">
+                                                                                    <td colspan="5"
+                                                                                        class="bg-light p-3 border-bottom">
+                                                                                        <pre class="mb-0 small text-muted bg-white p-2 border rounded"
+                                                                                            style="white-space: pre-wrap; font-size: 0.75rem;"><%= JSON.stringify(event.data, null, 2) %></pre>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <% } %>
+                                                                                    <% }); %>
+                                                                                        <% } else { %>
+                                                                                            <tr>
+                                                                                                <td colspan="5"
+                                                                                                    class="text-center text-muted py-5">
+                                                                                                    <i
+                                                                                                        class="bi bi-journal-x fs-1 d-block mb-2"></i>
+                                                                                                    Henüz kayıtlı olay
+                                                                                                    yok.
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <% } %>
                                                                 </tbody>
                                                             </table>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <% } %>
-
-                                    <!-- Live Events Log -->
-                                    <div class="col-md-8 mt-4">
-                                        <div class="card shadow-sm border-0 border-top border-4 border-warning">
-                                            <div
-                                                class="card-header bg-white pt-4 pb-2 d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="fw-bold text-dark mb-0"><i
-                                                            class="bi bi-activity me-2 text-primary"></i>SAML Olay
-                                                        Günlüğü</h5>
-                                                    <p class="text-muted small mb-0">Son 200 işlem kaydı.</p>
-                                                </div>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="form-check form-switch me-3">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="autoRefreshToggle">
-                                                        <label class="form-check-label small"
-                                                            for="autoRefreshToggle">Otomatik</label>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-primary" id="refreshBtn"><i
-                                                            class="bi bi-arrow-clockwise me-1"></i>Yenile</button>
-                                                </div>
-                                            </div>
-                                            <div class="card-body p-0">
-                                                <div class="table-responsive"
-                                                    style="max-height: 500px; overflow-y: auto;">
-                                                    <table
-                                                        class="table table-hover table-striped mb-0 small align-middle">
-                                                        <thead class="table-light sticky-top">
-                                                            <tr>
-                                                                <th style="width: 160px;">Zaman</th>
-                                                                <th style="width: 80px;">Aşama</th>
-                                                                <th style="width: 200px;">Olay</th>
-                                                                <th>Detay</th>
-                                                                <th style="width: 50px;">Veri</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="eventsTableBody">
-                                                            <% if (locals.events && events.length> 0) { %>
-                                                                <% events.forEach(event=> { %>
-                                                                    <tr>
-                                                                        <td class="text-nowrap text-muted">
-                                                                            <%= new
-                                                                                Date(event.timestamp).toLocaleString('tr-TR')
-                                                                                %>
-                                                                        </td>
-                                                                        <td><span
-                                                                                class="badge rounded-pill bg-<%= event.stage === 'SP' ? 'info' : (event.stage === 'IdP' ? 'warning' : 'secondary') %>">
-                                                                                <%= event.stage %>
-                                                                            </span></td>
-                                                                        <td class="fw-bold text-dark">
-                                                                            <%= event.title %>
-                                                                        </td>
-                                                                        <td class="text-muted">
-                                                                            <%= event.message %>
-                                                                        </td>
-                                                                        <td class="text-center">
-                                                                            <% if (event.data) { %>
-                                                                                <a class="btn btn-link btn-sm p-0 text-secondary"
-                                                                                    data-bs-toggle="collapse"
-                                                                                    href="#event-<%= Math.floor(event.id) %>"
-                                                                                    role="button" aria-expanded="false">
-                                                                                    <i
-                                                                                        class="bi bi-file-earmark-code"></i>
-                                                                                </a>
-                                                                                <% } %>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <% if (event.data) { %>
-                                                                        <tr class="collapse"
-                                                                            id="event-<%= Math.floor(event.id) %>">
-                                                                            <td colspan="5"
-                                                                                class="bg-light p-3 border-bottom">
-                                                                                <pre class="mb-0 small text-muted bg-white p-2 border rounded"
-                                                                                    style="white-space: pre-wrap; font-size: 0.75rem;"><%= JSON.stringify(event.data, null, 2) %></pre>
-                                                                            </td>
-                                                                        </tr>
-                                                                        <% } %>
-                                                                            <% }); %>
-                                                                                <% } else { %>
-                                                                                    <tr>
-                                                                                        <td colspan="5"
-                                                                                            class="text-center text-muted py-5">
-                                                                                            <i
-                                                                                                class="bi bi-journal-x fs-1 d-block mb-2"></i>
-                                                                                            Henüz kayıtlı olay yok.
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <% } %>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
         </div>
     </div>

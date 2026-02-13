@@ -6,7 +6,26 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const SamlStrategy = require('@node-saml/passport-saml').Strategy;
 const fs = require('fs');
+const taskManager = require('./task-manager');
+const logger = require('./logger');
 const PORT = process.env.PORT || 3000;
+
+// CRASH DEBUGGING
+process.on('uncaughtException', (err) => {
+    logger.error('----------------------------------------------------------------');
+    logger.error('[CRITICAL] UNCAUGHT EXCEPTION:', err);
+    logger.error('Stack:', err.stack);
+    console.error('----------------------------------------------------------------');
+    // keep running? No, usually safer to let it crash, but we want to see the log.
+    // logging is enough, system will exit usually unless we prevent it.
+    // For debugging, let's keep it alive if possible or just log.
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('----------------------------------------------------------------');
+    logger.error('[CRITICAL] UNHANDLED REJECTION:', reason);
+    console.error('----------------------------------------------------------------');
+});
 
 // EJS View Engine Setup
 app.set('view engine', 'ejs');
@@ -19,7 +38,7 @@ app.use(express.json());
 
 // DEBUG: Log all requests to see what the IdP is sending
 app.use((req, res, next) => {
-    console.log(`[REQUEST] ${req.method} ${req.url}`);
+    logger.info(`[REQUEST] ${req.method} ${req.url}`);
     next();
 });
 
@@ -55,7 +74,7 @@ function loadSamlConfig() {
             return JSON.parse(data);
         }
     } catch (e) {
-        console.error('Error loading SAML config:', e);
+        logger.error('Error loading SAML config:', e);
     }
     // Default fallback
     return {
@@ -114,7 +133,7 @@ function mapConfigToStrategyOptions(config) {
     };
 
     // DEBUG: Inspect the result of mapping
-    console.log('[DEBUG] Strategy Options Mapped:', {
+    logger.info('[DEBUG] Strategy Options Mapped:', {
         authnRequestsSigned: result.authnRequestsSigned,
         hasPrivateKey: !!result.privateKey,
         securityConfig: config.security
@@ -129,7 +148,7 @@ function saveSamlConfig(config) {
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
         return true;
     } catch (e) {
-        console.error('Error saving SAML config:', e);
+        logger.error('Error saving SAML config:', e);
         return false;
     }
 }
@@ -149,7 +168,7 @@ function loadSamlEvents() {
             return JSON.parse(data);
         }
     } catch (e) {
-        console.error('Error loading SAML events:', e);
+        logger.error('Error loading SAML events:', e);
     }
     return [];
 }
@@ -159,7 +178,7 @@ function saveSamlEvents(events) {
     try {
         fs.writeFileSync(eventsLogPath, JSON.stringify(events, null, 2), 'utf8');
     } catch (e) {
-        console.error('Error saving SAML events:', e);
+        logger.error('Error saving SAML events:', e);
     }
 }
 
@@ -239,7 +258,7 @@ const strategyOptions = mapConfigToStrategyOptions(samlConfig);
 strategyOptions.idpCert = strategyOptions.cert;
 
 // Debugging: check values (Moved after fix so idpCert is correct)
-console.log('SAML Strategy Options (Final):', {
+logger.info('SAML Strategy Options (Final):', {
     entryPoint: strategyOptions.entryPoint,
     issuer: strategyOptions.issuer,
     cert: strategyOptions.cert ? 'EXISTS' : 'MISSING',
@@ -252,80 +271,127 @@ console.log('SAML Strategy Options (Final):', {
  * Used both at startup and after config save.
  */
 function samlVerifyCallback(profile, done) {
-    // Log Profile received
-    addSamlEvent('SP', 'Identity Verified', 'IdP kimlik doğrulamasını başarıyla tamamladı.', { profileKeys: Object.keys(profile) });
+    try {
+        // Log Profile received
+        addSamlEvent('SP', 'Identity Verified', 'IdP kimlik doğrulamasını başarıyla tamamladı.', { profileKeys: Object.keys(profile) });
 
-    // Dynamic Attribute Mapping
-    addSamlEvent('SP', 'Attribute Mapping', 'Kullanıcı özellikleri yerel modele eşleniyor.');
-    const mapping = samlConfig.attributeMapping || {};
+        // Dynamic Attribute Mapping
+        addSamlEvent('SP', 'Attribute Mapping', 'Kullanıcı özellikleri yerel modele eşleniyor.');
 
-    // Helper: find attribute case-insensitively in profile root or .attributes
-    const getAttribute = (key) => {
-        if (!key) return null;
-        // 1. Exact match in profile root
-        if (profile[key] !== undefined) return profile[key];
-        // 2. Case-insensitive in profile root
-        const lowerKey = key.toLowerCase();
-        let foundKey = Object.keys(profile).find(k => k.toLowerCase() === lowerKey);
-        if (foundKey) return profile[foundKey];
-        // 3. Search in profile.attributes (some IdPs nest attributes)
-        if (profile.attributes) {
-            if (profile.attributes[key] !== undefined) return profile.attributes[key];
-            foundKey = Object.keys(profile.attributes).find(k => k.toLowerCase() === lowerKey);
-            if (foundKey) return profile.attributes[foundKey];
+        // DEBUG: Log entire profile to see what IdP sends
+        try {
+            logger.info('[DEBUG] Full SAML Profile:', JSON.stringify(profile, null, 2));
+        } catch (e) {
+            logger.error('[DEBUG] Could not stringify profile:', e);
+            logger.info('[DEBUG] Profile keys:', Object.keys(profile));
         }
-        return null;
-    };
 
-    // Map core fields
-    let email = getAttribute(mapping.email || 'email') || profile.email || profile.Email || 'saml@example.com';
-    let username = getAttribute(mapping.username || 'uid') || profile.nameID || profile.NameID || email || 'SAML User';
-    let firstName = getAttribute(mapping.firstName || 'givenName') || '';
-    let lastName = getAttribute(mapping.lastName || 'surname') || '';
-    let department = getAttribute(mapping.department || 'department') || '';
-    let roles = getAttribute(mapping.roles || 'groups') || [];
+        const mapping = samlConfig.attributeMapping || {};
 
-    // Normalize roles to array
-    if (typeof roles === 'string') {
-        roles = roles.split(',').map(r => r.trim()).filter(Boolean);
-    }
-    if (!Array.isArray(roles)) roles = [String(roles)];
+        // Helper: find attribute case-insensitively in profile root or .attributes
+        const getAttribute = (key) => {
+            if (!key) return null;
+            // 1. Exact match in profile root
+            if (profile[key] !== undefined) return profile[key];
+            // 2. Case-insensitive in profile root
+            const lowerKey = key.toLowerCase();
+            let foundKey = Object.keys(profile).find(k => k.toLowerCase() === lowerKey);
+            if (foundKey) return profile[foundKey];
+            // 3. Search in profile.attributes (some IdPs nest attributes)
+            if (profile.attributes) {
+                if (profile.attributes[key] !== undefined) return profile.attributes[key];
+                foundKey = Object.keys(profile.attributes).find(k => k.toLowerCase() === lowerKey);
+                if (foundKey) return profile.attributes[foundKey];
+            }
+            return null;
+        };
 
-    // --- Permission Resolution ---
-    const permissions = [];
-    const permConfig = samlConfig.permissions || {};
-    if (permConfig.rules && Array.isArray(permConfig.rules)) {
-        // Get the source attribute values for permission matching
-        let permSource = getAttribute(permConfig.sourceAttribute || 'groups') || [];
-        if (typeof permSource === 'string') {
-            permSource = permSource.split(',').map(r => r.trim()).filter(Boolean);
+        // Map core fields
+        let email = getAttribute(mapping.email || 'email') || profile.email || profile.Email || 'saml@example.com';
+        let username = getAttribute(mapping.username || 'uid') || profile.nameID || profile.NameID || email || 'SAML User';
+        let firstName = getAttribute(mapping.firstName || 'givenName') || '';
+        let lastName = getAttribute(mapping.lastName || 'surname') || '';
+        let department = getAttribute(mapping.department || 'department') || '';
+        let roles = getAttribute(mapping.roles || 'groups') || [];
+
+        // Normalize roles to array
+        if (typeof roles === 'string') {
+            roles = roles.split(',').map(r => r.trim()).filter(Boolean);
         }
-        if (!Array.isArray(permSource)) permSource = [String(permSource)];
+        if (!Array.isArray(roles)) roles = [String(roles)];
 
-        // Match rules
-        for (const rule of permConfig.rules) {
-            if (permSource.some(v => v.toLowerCase() === rule.idpValue.toLowerCase())) {
-                if (!permissions.includes(rule.permission)) {
-                    permissions.push(rule.permission);
+        // --- Permission Resolution ---
+        const permissions = [];
+        const permConfig = samlConfig.permissions || {};
+        if (permConfig.rules && Array.isArray(permConfig.rules)) {
+            // Get the source attribute values for permission matching
+            let permSource = getAttribute(permConfig.sourceAttribute || 'groups') || [];
+            if (typeof permSource === 'string') {
+                permSource = permSource.split(',').map(r => r.trim()).filter(Boolean);
+            }
+            if (!Array.isArray(permSource)) permSource = [String(permSource)];
+
+            // Ensure all values are trimmed strings
+            permSource = permSource.map(v => String(v).trim()).filter(Boolean);
+
+            logger.info('[DEBUG] Permission Source (Groups):', permSource);
+
+            // Match rules
+            for (const rule of permConfig.rules) {
+                if (permSource.some(v => v.toLowerCase() === rule.idpValue.toLowerCase())) {
+                    logger.info(`[DEBUG] Match found for rule: ${rule.idpValue} -> ${rule.permission}`);
+                    if (!permissions.includes(rule.permission)) {
+                        permissions.push(rule.permission);
+                    }
                 }
             }
         }
+
+        addSamlEvent('SP', 'Permission Resolved', `Çözümlenen yetkiler: ${permissions.length > 0 ? permissions.join(', ') : 'Yok'}`, { permissions, roles });
+
+        const mappedProfile = { email, username, firstName, lastName, department, roles };
+
+        // Mark setup task as complete
+        taskManager.completeTask('saml-setup');
+
+        // Mark attribute mapping task (Task 2) as complete if all required fields are present
+        if (mappedProfile.email && mappedProfile.firstName && mappedProfile.lastName && mappedProfile.department) {
+            taskManager.completeTask('attribute-mapping');
+            addSamlEvent('SP', 'Task Completed', 'Görev 2: Attribute Eşleştirmesi Tamamlandı.');
+        }
+
+        // Safely clone profile to avoid circular references in session/views
+        let safeSamlProfile = {};
+        try {
+            safeSamlProfile = JSON.parse(JSON.stringify(profile));
+        } catch (e) {
+            logger.error('[CRITICAL] Circular reference in SAML profile, using simplified version.');
+            safeSamlProfile = {
+                nameID: profile.nameID || profile.NameID,
+                sessionIndex: profile.sessionIndex,
+                ...Object.keys(profile).reduce((acc, key) => {
+                    if (typeof profile[key] === 'string' || typeof profile[key] === 'number') {
+                        acc[key] = profile[key];
+                    }
+                    return acc;
+                }, {})
+            };
+        }
+
+        const user = {
+            id: profile.nameID || email || 'saml-user',
+            username: username,
+            email: email,
+            source: 'saml',
+            samlProfile: safeSamlProfile,
+            mappedProfile: mappedProfile,
+            permissions: permissions
+        };
+        return done(null, user);
+    } catch (error) {
+        logger.error('[CRITICAL] Error in samlVerifyCallback:', error);
+        return done(error);
     }
-
-    addSamlEvent('SP', 'Permission Resolved', `Çözümlenen yetkiler: ${permissions.length > 0 ? permissions.join(', ') : 'Yok'}`, { permissions, roles });
-
-    const mappedProfile = { email, username, firstName, lastName, department, roles };
-
-    const user = {
-        id: profile.nameID || email || 'saml-user',
-        username: username,
-        email: email,
-        source: 'saml',
-        samlProfile: profile,
-        mappedProfile: mappedProfile,
-        permissions: permissions
-    };
-    return done(null, user);
 }
 
 passport.use('saml', new SamlStrategy(
@@ -388,10 +454,10 @@ app.post('/login/sso', (req, res) => {
         // Helpful info for debugging
         const correctUrl = `${req.protocol}://${req.get('host')}/login/sso/callback`;
 
-        console.error('--------------------------------------------------');
-        console.error('[CRITICAL CONFIG ERROR] IdP sent response to /login/sso!');
-        console.error(`Expected (Correct) ACS URL: ${correctUrl}`);
-        console.error('--------------------------------------------------');
+        logger.error('--------------------------------------------------');
+        logger.error('[CRITICAL CONFIG ERROR] IdP sent response to /login/sso!');
+        logger.error(`Expected (Correct) ACS URL: ${correctUrl}`);
+        logger.error('--------------------------------------------------');
 
         return res.status(400).send(`
             <div style="font-family: sans-serif; padding: 20px; text-align: center;">
@@ -420,8 +486,8 @@ app.get('/login/sso', (req, res, next) => {
     // Safely check properties to avoid 'undefined' errors
     const hasSAMLResponse = (req.query && req.query.SAMLResponse) || (req.body && req.body.SAMLResponse);
     if (hasSAMLResponse) {
-        console.error('[CRITICAL] SAMLResponse detected at /login/sso! This indicates an IdP configuration error.');
-        console.error('The IdP ACS URL is likely set to /login/sso instead of /login/sso/callback');
+        logger.error('[CRITICAL] SAMLResponse detected at /login/sso! This indicates an IdP configuration error.');
+        logger.error('The IdP ACS URL is likely set to /login/sso instead of /login/sso/callback');
         return res.status(400).send(`
             <h1>Configuration Error Detected</h1>
             <p>The Identity Provider (IdP) sent the SAML Response to <code>/login/sso</code>.</p>
@@ -459,16 +525,16 @@ app.get('/login/sso', (req, res, next) => {
                     addSamlEvent('System', 'Redirecting', 'Kullanıcı Identity Provider\'a yönlendiriliyor...');
 
                     return req.session.save((err) => {
-                        if (err) console.error('Session save error:', err);
+                        if (err) logger.error('Session save error:', err);
                         return originalRedirect.apply(this, arguments);
                     });
 
                 } catch (err) {
-                    console.error('Error inflating SAMLRequest:', err);
+                    logger.error('Error inflating SAMLRequest:', err);
                 }
             }
         } catch (e) {
-            console.error('Error capturing SAMLRequest:', e);
+            logger.error('Error capturing SAMLRequest:', e);
         }
         return originalRedirect.apply(this, arguments);
     };
@@ -483,6 +549,7 @@ app.get('/login/sso', (req, res, next) => {
 // Login Process (SAML Callback)
 app.post('/login/sso/callback',
     (req, res, next) => {
+        logger.info('[DEBUG] Hit /login/sso/callback - Step 1');
         addSamlEvent('SP', 'SAML Response Received', 'IdP\'den yanıt döndü (Assertion Consumer Service).');
 
         // Capture raw SAMLResponse
@@ -515,7 +582,7 @@ app.post('/login/sso/callback',
                 // ---------------------------
 
             } catch (e) {
-                console.error('Error capturing SAMLResponse:', e);
+                logger.error('Error capturing SAMLResponse:', e);
                 addSamlEvent('System', 'Error', 'SAML Response işlenirken hata oluştu.', { error: e.message });
             }
         }
@@ -526,36 +593,54 @@ app.post('/login/sso/callback',
             res.locals.tempSamlRequestXML = req.session.samlRequestXML;
         }
 
-        next();
-    },
-    passport.authenticate('saml', {
-        failureRedirect: '/login',
-        failureFlash: true
-    }),
-    (req, res) => {
-        // Attach the captured XMLs to the user object for display if needed
-        // Or just rely on session. Ideally, we move them to user object so they persist 
-        // cleanly with the user session if desired, or just keep in session.
-        // For the dashboard to show them, let's ensure they are available.
-        // Attach the captured XMLs to the user object for display if needed
-        if (req.user) {
-            // Restore from locals if session was regenerated/cleared
-            if (res.locals.tempSamlRequestXML) {
-                req.user.samlRequestXML = res.locals.tempSamlRequestXML;
-                req.session.samlRequestXML = res.locals.tempSamlRequestXML;
-            } else if (req.session.samlRequestXML) {
-                req.user.samlRequestXML = req.session.samlRequestXML;
-            } else if (global.recentSamlRequestXML) {
-                // Fallback to global
-                req.user.samlRequestXML = global.recentSamlRequestXML;
-                req.session.samlRequestXML = global.recentSamlRequestXML;
+        // Custom Passport Callback for Better Debugging
+        passport.authenticate('saml', (err, user, info) => {
+            if (err) {
+                logger.error('[CRITICAL] Passport Authentication Error:', err);
+                return res.status(500).send(`
+                    <h1>Authentication Error</h1>
+                    <p>An error occurred during SAML authentication.</p>
+                    <pre>${err.message}</pre>
+                `);
             }
 
-            if (req.session.samlResponseXML) {
-                req.user.samlResponseXML = req.session.samlResponseXML;
+            if (!user) {
+                logger.error('[CRITICAL] Passport Authentication Failed (No User):', info);
+                let debugInfo = info;
+                if (info instanceof Error) {
+                    debugInfo = { message: info.message, stack: info.stack, ...info };
+                }
+                return res.status(401).send(`
+                    <h1>Authentication Failed</h1>
+                    <p>Identity Provider request failed validation.</p>
+                    <p><b>Reason:</b> ${info && info.message ? info.message : 'Unknown'}</p>
+                    <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
+                `);
             }
-        }
-        res.redirect('/dashboard');
+
+            // Establish Session
+            req.logIn(user, (err) => {
+                if (err) {
+                    logger.error('[CRITICAL] Session Login Error:', err);
+                    return next(err);
+                }
+
+                // Restore/Persist XML logs to user object in session
+                if (res.locals.tempSamlRequestXML) {
+                    req.user.samlRequestXML = res.locals.tempSamlRequestXML;
+                } else if (global.recentSamlRequestXML) {
+                    req.user.samlRequestXML = global.recentSamlRequestXML;
+                }
+
+                if (req.session.samlResponseXML) {
+                    req.user.samlResponseXML = req.session.samlResponseXML;
+                } else if (global.recentSamlResponseXML) {
+                    req.user.samlResponseXML = global.recentSamlResponseXML;
+                }
+
+                return res.redirect('/dashboard');
+            });
+        })(req, res, next);
     }
 );
 
@@ -563,23 +648,7 @@ app.post('/login/sso/callback',
 // Config is already loaded at the top.
 
 // Admin Page Route
-app.get('/admin', (req, res) => {
-    if (!req.isAuthenticated()) {
-        return res.redirect('/login');
-    }
-    // Simple authorization check (In production, check for admin role)
-    if (req.user.username !== 'admin') {
-        return res.status(403).send('Erişim reddedildi. Sadece adminler görebilir.');
-    }
 
-    res.render('admin', {
-        title: 'SAML Yönetim Paneli',
-        config: samlConfig,
-        user: req.user,
-        message: req.query.success ? 'Ayarlar başarıyla kaydedildi!' : null,
-        events: global.samlEvents || []
-    });
-});
 
 // API Endpoint for Live Events (Accessible to all authenticated users)
 app.get('/api/events', (req, res) => {
@@ -657,7 +726,7 @@ app.post('/admin/save-saml', (req, res) => {
         res.redirect('/admin?success=true');
 
     } catch (e) {
-        console.error("Config save error:", e);
+        logger.error("Config save error:", e);
         // Keep the user on the page but show error
         // Ideally we should flash this, but simple text for now
         res.status(500).send(`
@@ -685,6 +754,86 @@ function safeSet(obj, path, value) {
     current[keys[keys.length - 1]] = value;
 }
 
+// Permission Check Middleware
+// Permission Check Middleware
+function checkPermission(requiredPermission) {
+    return (req, res, next) => {
+        // Bypass for local admin - they have all permissions
+        if (req.isAuthenticated() && req.user.username === 'admin') {
+            return next();
+        }
+
+        if (req.isAuthenticated() && req.user.permissions && req.user.permissions.includes(requiredPermission)) {
+            // Log successful permission access for task tracking
+            // Only complete if source is SAML as requested
+            if (req.user.source === 'saml') {
+                taskManager.completeTask('permission-check');
+            }
+            return next();
+        }
+
+        res.status(403).render('error', { message: 'Bu sayfaya erişim yetkiniz yok. Gerekli yetki: ' + requiredPermission, title: 'Erişim Engellendi' });
+    };
+}
+
+// Admin Route (Protected)
+app.get('/admin', (req, res, next) => {
+    // Check for either local admin OR iammert_admin permission
+    if (req.isAuthenticated() && (req.user.username === 'admin' || (req.user.permissions && req.user.permissions.includes('iammert_admin')))) {
+        // Complete admin task only if source is SAML
+        if (req.user.source === 'saml' && req.user.permissions.includes('iammert_admin')) {
+            taskManager.completeTask('permission-check');
+        }
+        return next();
+    }
+    res.redirect('/login');
+}, (req, res) => {
+    const config = samlConfig;
+
+    // Permission Rules View Logic
+    const fixedPermissions = [
+        { check: 'iammert_admin', label: 'Admin Paneli Yetkisi (iammert_admin)', placeholder: 'admin' },
+        { check: 'iammert_sozluk', label: 'Sözlük Yetkisi (iammert_sozluk)', placeholder: 'dev' }
+    ];
+
+    const permissionRules = fixedPermissions.map(fp => {
+        let currentVal = '';
+        if (config.permissions && config.permissions.rules) {
+            const rule = config.permissions.rules.find(r => r.permission === fp.check);
+            if (rule) currentVal = rule.idpValue;
+        }
+        return { ...fp, currentValue: currentVal };
+    });
+
+    res.render('admin', {
+        title: 'Admin Panel',
+        config: config,
+        user: req.user,
+        permissionRules: permissionRules,
+        message: req.query.success ? 'Ayarlar başarıyla kaydedildi!' : null,
+        events: global.samlEvents || []
+    });
+});
+
+// Dictionary Route (Protected)
+app.get('/sozluk', (req, res, next) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/login');
+    }
+    next();
+}, checkPermission('iammert_sozluk'), (req, res) => {
+    res.render('sozluk', { user: req.user });
+});
+
+// API: Reset Tasks (Admin only)
+app.post('/admin/reset-tasks', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+    taskManager.resetTasks();
+    res.redirect('/admin?success=tasks_reset');
+});
+
 // Dashboard (Protected Route)
 app.get('/dashboard', (req, res) => {
     if (!req.isAuthenticated()) {
@@ -710,7 +859,8 @@ app.get('/dashboard', (req, res) => {
         user: req.user,
         events: global.samlEvents || [],
         mappedProfile: req.user.mappedProfile || null,
-        permissions: req.user.permissions || []
+        permissions: req.user.permissions || [],
+        tasks: taskManager.loadTasks()
     });
 });
 

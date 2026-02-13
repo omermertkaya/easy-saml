@@ -9,6 +9,11 @@ services:
     volumes:
       # SAML konfigürasyonunun kalıcı olması için volume mapping
       - ./saml-config.json:/app/saml-config.json
+      # Görev takibinin kalıcı olması için
+      - ./src/tasks.json:/app/src/tasks.json
+      # SAML olay kaydı ve sistem logları için
+      - ./saml-events.json:/app/saml-events.json
+      - ./logs:/app/logs
     environment:
       - PORT=3000
       - SESSION_SECRET=bu_gizli_anahtar_degistirilmeli_docker

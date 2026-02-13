@@ -1,6 +1,9 @@
 {
     "ignore": [
-        "saml-config.json"
+        "saml-config.json",
+        "src/tasks.json",
+        "saml-events.json",
+        "logs/*"
     ],
     "ext": "js,json"
 }

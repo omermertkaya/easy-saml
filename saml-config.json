@@ -43,16 +43,12 @@
     "sourceAttribute": "groups",
     "rules": [
       {
-        "idpValue": "admin",
-        "permission": "SILME_BUTON_YETKISI"
+        "idpValue": "iammert_admin",
+        "permission": "iammert_admin"
       },
       {
-        "idpValue": "admin",
-        "permission": "EKLEME_BUTON_YETKISI"
-      },
-      {
-        "idpValue": "dev",
-        "permission": "EKLEME_BUTON_YETKISI"
+        "idpValue": "iammert_sozluk",
+        "permission": "iammert_sozluk"
       }
     ]
   }
