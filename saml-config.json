@@ -10,10 +10,10 @@
     "x509cert": ""
   },
   "idp": {
-    "entityId": "https://id.mkaya.alkanlab.com/saml/aa6e4ea1-e476-7203-ad5c-e21e63cd1a88",
-    "ssoUrl": "https://id.mkaya.alkanlab.com/saml/aa6e4ea1-e476-7203-ad5c-e21e63cd1a88/login",
+    "entityId": "",
+    "ssoUrl": "",
     "sloUrl": "",
-    "x509cert": "-----BEGIN CERTIFICATE-----\r\nMIIDpjCCAo6gAwIBAgIJALY4xXwB6/r9MA0GCSqGSIb3DQEBCwUAMIGAMQswCQYDVQQGEwJVUzET\r\nMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEfMB0GCSqGSIb3DQEJ\r\nARYQaW5mb0Btb25vZm9yLmNvbTEQMA4GA1UEChMHTW9ub2ZvcjERMA8GA1UEAxMITW9ub3NpZ24w\r\nHhcNMjYwMjA4MTcwODI5WhcNMzYwMjA4MTcwODI5WjCBgDELMAkGA1UEBhMCVVMxEzARBgNVBAgT\r\nCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xHzAdBgkqhkiG9w0BCQEWEGluZm9A\r\nbW9ub2Zvci5jb20xEDAOBgNVBAoTB01vbm9mb3IxETAPBgNVBAMTCE1vbm9zaWduMIIBIjANBgkq\r\nhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxlcsrV5ZIG2FAwoPM5AuvQPc+BA1ikqvyVTZNnzY+Ofu\r\nBggOv0PdzeqpmIjnIO0IMNoTtMBRCuocfq6nnSfchTDRACJNiPw1MlAU8HqARFzc9I4QfSfoJR9u\r\nmJ8B2l8BRDTl3+i4jrl/aEUAp9wkMzc7hyLkgHI2Et0Cp652jUprco7RzDBPrY7gcftmWB7d5p8b\r\nI3rjKV4VM9/BTsGto2EZHp4oIL3Luqr5/bAiyiiAhUsLCDQGNivh9Ab5tPV0TDDkQjG6891Z7tJs\r\nKA0WgqmNQQlY57E4bTL5iMDSjTokralGjnizWoRbyUxngf3RSs7n5VSNi8Nk/B9KSuwnDwIDAQAB\r\noyEwHzAdBgNVHQ4EFgQUy4FLT0pL4RJ8gHsrUifoYeBjOPUwDQYJKoZIhvcNAQELBQADggEBACNr\r\naHcqJouf12I930gQMh0smKz6U7aLC8ncVTm1cMp4ajdGdI/G3cawJermLysp/UIKeCEaR4X4QSZp\r\nULynul3Too9+u0Q15/jConwon17mwUE4+PLjVofXR+Jw51U75E0x4JvhUJ9jsJDD3d5CIoOuH3Wk\r\nPeZcUKZcQVchrOG1ifvADr+YrWMSis6kkfPuZhifeOlih9XSFoSZfHOzRjX4j+Wgq3/IaJhHSYkG\r\nINb+IuWv4lQWFixVeigy1aiXtEAlFTZFqU20/LtTKecEzAtH2rCKObVgNN6SAK9buR3onTfhQr4Y\r\nek0gRoGEfbWpcIeR5kadA0tyRb1s8WpUFgM=\r\n-----END CERTIFICATE-----\r\n"
+    "x509cert": ""
   },
   "security": {
     "authnRequestsSigned": false,
@@ -41,15 +41,6 @@
   },
   "permissions": {
     "sourceAttribute": "groups",
-    "rules": [
-      {
-        "idpValue": "iammert_admin",
-        "permission": "iammert_admin"
-      },
-      {
-        "idpValue": "iammert_sozluk",
-        "permission": "iammert_sozluk"
-      }
-    ]
+    "rules": []
   }
 }

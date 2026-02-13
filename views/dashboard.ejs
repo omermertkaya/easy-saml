@@ -621,11 +621,14 @@
                                                                 <input class="form-check-input" type="checkbox"
                                                                     id="autoRefreshToggle">
                                                                 <label class="form-check-label small"
-                                                                    for="autoRefreshToggle">Otomatik</label>
+                                                                    for="autoRefreshToggle">Otomatik Yenile</label>
                                                             </div>
                                                             <button class="btn btn-sm btn-outline-primary"
                                                                 id="refreshBtn"><i
                                                                     class="bi bi-arrow-clockwise me-1"></i>Yenile</button>
+                                                            <button class="btn btn-sm btn-outline-danger ms-2"
+                                                                id="clearBtn"><i
+                                                                    class="bi bi-trash me-1"></i>Temizle</button>
                                                         </div>
                                                     </div>
                                                     <div class="card-body p-0">
@@ -795,6 +798,30 @@
 
             // Parse SAML Request Details
             parseAndDisplayRequestDetails();
+
+            // Clear Button Logic
+            const clearBtn = document.getElementById('clearBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    if (confirm('Tüm olay günlüğünü temizlemek istediğinize emin misiniz?')) {
+                        fetch('/api/events/clear', { method: 'POST' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Refresh the table (simple reload or clear DOM)
+                                    // Reloading is easiest to ensure clean state
+                                    window.location.reload();
+                                } else {
+                                    alert('Bir hata oluştu: ' + (data.error || 'Bilinmeyen hata'));
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Clear error:', err);
+                                alert('İletişim hatası.');
+                            });
+                    }
+                });
+            }
         });
 
         function parseAndDisplayRequestDetails() {

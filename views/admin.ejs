@@ -162,7 +162,8 @@
                                                 <label for="idp_ssoUrl" class="form-label fw-bold">IdP SSO URL (Entry
                                                     Point)</label>
                                                 <input type="url" class="form-control" id="idp_ssoUrl" name="idp_ssoUrl"
-                                                    value="<%= config.idp ? config.idp.ssoUrl : '' %>" required>
+                                                    value="<%= config.idp ? config.idp.ssoUrl : '' %>"
+                                                    placeholder="Örn: https://dev-123456.okta.com/app/exk1..." required>
                                                 <div class="form-text">Kullanıcının yönlendirileceği IdP giriş sayfası.
                                                 </div>
                                             </div>
@@ -171,7 +172,8 @@
                                                     (Opsiyonel)</label>
                                                 <input type="text" class="form-control" id="idp_entityId"
                                                     name="idp_entityId"
-                                                    value="<%= config.idp ? config.idp.entityId : '' %>">
+                                                    value="<%= config.idp ? config.idp.entityId : '' %>"
+                                                    placeholder="Örn: http://www.okta.com/exk1...">
                                                 <div class="form-text">IdP'nin kimliğini doğrulamak için kullanılır
                                                     (Audience/Issuer check).</div>
                                             </div>
@@ -180,6 +182,7 @@
                                                     Certificate (X.509)</label>
                                                 <textarea class="form-control font-monospace small" id="idp_x509cert"
                                                     name="idp_x509cert" rows="5"
+                                                    placeholder="-----BEGIN CERTIFICATE-----&#10;MIIDpDCCAoygAwIBAgIG...&#10;-----END CERTIFICATE-----"
                                                     required><%= config.idp ? config.idp.x509cert : '' %></textarea>
                                                 <div class="form-text">IdP'den gelen imzalı yanıtları doğrulamak için
                                                     gereklidir (PEM formatında).</div>

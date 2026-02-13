@@ -257,15 +257,6 @@ const strategyOptions = mapConfigToStrategyOptions(samlConfig);
 // Fix: explicit idpCert mapping if needed (MUST be done before usage)
 strategyOptions.idpCert = strategyOptions.cert;
 
-// Debugging: check values (Moved after fix so idpCert is correct)
-logger.info('SAML Strategy Options (Final):', {
-    entryPoint: strategyOptions.entryPoint,
-    issuer: strategyOptions.issuer,
-    cert: strategyOptions.cert ? 'EXISTS' : 'MISSING',
-    idpCert: strategyOptions.idpCert ? 'EXISTS' : 'MISSING', // Should be populated now
-    authnRequestsSigned: strategyOptions.authnRequestsSigned
-});
-
 /**
  * Shared SAML verify callback — handles full attribute mapping + permission resolution.
  * Used both at startup and after config save.
@@ -398,10 +389,32 @@ function samlVerifyCallback(profile, done) {
     }
 }
 
-passport.use('saml', new SamlStrategy(
-    strategyOptions,
-    samlVerifyCallback
-));
+try {
+    // Debugging: check values (Moved after fix so idpCert is correct)
+    logger.info('SAML Strategy Options (Final):', {
+        entryPoint: strategyOptions.entryPoint,
+        issuer: strategyOptions.issuer,
+        cert: strategyOptions.cert ? 'EXISTS' : 'MISSING',
+        idpCert: strategyOptions.idpCert ? 'EXISTS' : 'MISSING', // Should be populated now
+        authnRequestsSigned: strategyOptions.authnRequestsSigned
+    });
+
+    passport.use('saml', new SamlStrategy(
+        strategyOptions,
+        samlVerifyCallback
+    ));
+} catch (e) {
+    logger.error('[WARNING] Failed to initialize SAML Strategy (likely missing config):', e.message);
+    logger.info('Using Dummy SAML Strategy to allow server startup.');
+
+    // Dummy Strategy to prevent route crashes and inform user
+    passport.use('saml', {
+        name: 'saml',
+        authenticate: function (req, options) {
+            this.fail({ message: 'SAML yapılandırması eksik veya hatalı. Lütfen yönetici paneli üzerinden ayarları güncelleyin.' }, 400);
+        }
+    });
+}
 
 // --- Authentication Logic End ---
 
@@ -660,6 +673,21 @@ app.get('/api/events', (req, res) => {
         return res.status(403).json({ error: 'Erişim reddedildi' });
     }
     res.json(global.samlEvents || []);
+});
+
+// API Endpoint to Clear Events
+app.post('/api/events/clear', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(403).json({ error: 'Erişim reddedildi' });
+    }
+
+    // Clear in memory
+    global.samlEvents = [];
+
+    // Clear in file
+    saveSamlEvents([]);
+
+    res.json({ success: true, message: 'Olay günlüğü temizlendi.' });
 });
 
 // Save Configuration Route - Advanced
