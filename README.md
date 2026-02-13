@@ -103,6 +103,26 @@ IdP tarafında SP (Service Provider) ayarlarınızı şu şekilde yapmalısını
 
 ---
 
+## 📊 Log Yapısı
+
+Uygulama, hata ayıklamayı kolaylaştırmak için detaylı loglama yapar. Log dosyaları `logs/` dizini altında toplanır.
+
+*   **`logs/combined.log`**: Tüm uygulama aktivitelerini içerir (Bilgi, Uyarı ve Hatalar). SAML istek/yanıt döngüleri, oturum açma işlemleri ve genel sunucu durumu buraya kaydedilir. JSON formatındadır.
+*   **`logs/error.log`**: Sadece hata mesajlarını içerir. Kritik hataları veya yakalanan istisnaları (Exceptions) hızlıca bulmak için kullanılır.
+*   **`saml-events.json`**: Dashboard üzerindeki "Canlı Olay Günlüğü" tablosunu besleyen, son 50 SAML olayını tutan geçici veri dosyasıdır.
+
+### Log Örneği (Combined)
+```json
+{
+  "level": "info",
+  "message": "[REQUEST] POST /login/sso/callback",
+  "service": "easy-saml-service",
+  "timestamp": "2026-02-12T20:00:02.218Z"
+}
+```
+
+---
+
 ## 🤝 Katkıda Bulunma
 
 Hataları bildirmek veya özellik eklemek için lütfen bir "Issue" açın veya "Pull Request" gönderin.
