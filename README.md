@@ -14,9 +14,31 @@ Easy SAML, Node.js ve Passport.js kullanılarak geliştirilmiş, basit ve eğiti
 *   **Debug Modu:** SAML Redirect döngülerini ve hataları algılayan gelişmiş loglama ve hata sayfaları.
 *   **Modern Arayüz:** EJS ve CSS ile temiz, anlaşılır bir kullanıcı arayüzü.
 
+
 ---
 
-## 🛠️ Kurulum ve Çalıştırma
+## 🎯 Eğitim Görevleri
+
+Bu proje, SAML entegrasyonunu adım adım öğrenmeniz için tasarlanmış 3 temel görev içerir. Görevleri tamamladıkça sistemdeki ilerleme çubuğu güncellenecektir.
+
+### Görev 1: IDP Ayarlarını Yapılandır
+*   **Amaç:** Bir Identity Provider (Örn: Auth0, Okta, Keycloak) ile temel SAML bağlantısını kurmak.
+*   **Nasıl Yapılır:** Yönetici paneline (`/admin`) gidin ve IdP'den aldığınız `SSO URL` ve `X.509 Sertifikası`nı girin.
+*   **Başarı Kriteri:** "SAML ile Giriş Yap" butonuna tıkladığınızda IdP giriş ekranına yönlendirilip başarılı bir şekilde geri dönebilmek.
+
+### Görev 2: Attribute Eşleştirmesi (Mapping)
+*   **Amaç:** IdP'den dönen kullanıcı bilgilerini (Claims) uygulamanın beklediği formata eşleştirmek.
+*   **Gereksinimler:** Uygulama şu alanları bekler: `email`, `username`, `firstname` (ad), `lastname` (soyad), `department`.
+*   **Nasıl Yapılır:** Yönetici panelindeki "Özellik Eşleştirme" sekmesinden IdP'nizin gönderdiği parametre isimlerini (örn: `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` -> `email`) girin.
+*   **Başarı Kriteri:** Giriş yaptıktan sonra Dashboard'da profil bilgilerinizin eksiksiz görünmesi.
+
+### Görev 3: Yetki Kontrolü (Role Based Access)
+*   **Amaç:** Kullanıcı gruıplarına göre yetkilendirme (Authorization) yapmak.
+*   **Senaryo:** `admin` grubundaki kullanıcılar Yönetici Paneline, `dev` grubundakiler Sözlük sayfasına erişebilmelidir.
+*   **Nasıl Yapılır:** IdP'den dönen grup bilgisini (örn: `groups` veya `roles`) "Yetki Ayarları" sekmesinden eşleştirin.
+*   **Başarı Kriteri:** SAML ile giriş yapmış bir kullanıcının yetkisi olan özel sayfalara erişebilmesi.
+
+---
 
 Projeyi çalıştırmanın en kolay yolu Docker kullanmaktır.
 

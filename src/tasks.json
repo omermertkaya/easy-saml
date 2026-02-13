@@ -3,21 +3,21 @@
     "id": "saml-setup",
     "title": "Görev 1: IDP Ayarlarını Yapılandır ve Giriş Yap",
     "description": "Admin panelinden Identity Provider (IdP) ayarlarını (SSO URL, Sertifika vb.) yapılandırın ve SAML ile başarılı bir giriş yapın.",
-    "completed": true,
-    "completedAt": "2026-02-12T16:43:44.664Z"
+    "completed": false,
+    "completedAt": null
   },
   {
     "id": "attribute-mapping",
     "title": "Görev 2: Attribute Eşleştirmesi Yap",
-    "description": "Admin panelinden IdP'den gelen özellikleri (email, username vb.) uygulama alanlarıyla eşleştirin ve giriş yaparak test edin.",
-    "completed": true,
-    "completedAt": "2026-02-12T16:43:44.664Z"
+    "description": "Admin panelinden IdP'den gelen özellikleri (email, username, firstname, lastname, department) uygulama alanlarıyla eşleştirin ve giriş yaparak test edin. Sistem bu verilerin doğruluğunu kontrol edecektir.",
+    "completed": false,
+    "completedAt": null
   },
   {
     "id": "permission-check",
     "title": "Görev 3: Yetki Kontrolü",
     "description": "SAML ile giriş yapan kullanıcının, IdP'den gelen grup bilgisine göre (admin veya dev) ilgili sayfalara (Admin Paneli veya Sözlük) erişebildiğini doğrulayın.",
-    "completed": true,
-    "completedAt": "2026-02-12T20:07:00.000Z"
+    "completed": false,
+    "completedAt": null
   }
 ]

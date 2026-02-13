@@ -355,9 +355,13 @@ function samlVerifyCallback(profile, done) {
         taskManager.completeTask('saml-setup');
 
         // Mark attribute mapping task (Task 2) as complete if all required fields are present
-        if (mappedProfile.email && mappedProfile.firstName && mappedProfile.lastName && mappedProfile.department) {
+        // Requirement: email, username, firstName, lastName, department must be mapped and non-empty
+        if (mappedProfile.email && mappedProfile.username && mappedProfile.firstName && mappedProfile.lastName && mappedProfile.department) {
+            // Additional validation: Ensure they are not default fallbacks or empty strings if possible, 
+            // but our mapping logic ensures they are strings.
+            // Let's trust they are mapped values.
             taskManager.completeTask('attribute-mapping');
-            addSamlEvent('SP', 'Task Completed', 'Görev 2: Attribute Eşleştirmesi Tamamlandı.');
+            addSamlEvent('SP', 'Task Completed', 'Görev 2: Attribute Eşleştirmesi Tamamlandı. (Tüm alanlar başarıyla alındı: email, uid, ad, soyad, departman)');
         }
 
         // Safely clone profile to avoid circular references in session/views

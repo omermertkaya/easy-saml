@@ -299,3 +299,34 @@
 {"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-12T21:47:23.364Z"}
 {"level":"info","message":"[REQUEST] GET /logout","service":"easy-saml-service","timestamp":"2026-02-12T21:47:34.213Z"}
 {"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-02-12T21:47:34.231Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-02-13T11:20:01.222Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-02-13T11:20:02.081Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:20:02.088Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:20:10.286Z"}
+{"level":"info","message":"[REQUEST] GET /logout","service":"easy-saml-service","timestamp":"2026-02-13T11:20:11.313Z"}
+{"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-02-13T11:20:11.319Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-02-13T11:20:12.507Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-02-13T11:20:13.178Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:20:13.183Z"}
+{"level":"info","message":"[REQUEST] GET /glossary","service":"easy-saml-service","timestamp":"2026-02-13T11:20:14.709Z"}
+{"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-02-13T11:20:16.026Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:20:17.413Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:20:28.958Z"}
+{"level":"info","message":"[REQUEST] POST /admin/reset-tasks","service":"easy-saml-service","timestamp":"2026-02-13T11:20:33.586Z"}
+{"level":"info","message":"[REQUEST] GET /admin?success=tasks_reset","service":"easy-saml-service","timestamp":"2026-02-13T11:20:33.591Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:20:39.547Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:21:07.414Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:21:25.749Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:21:53.539Z"}
+{"authnRequestsSigned":false,"hasPrivateKey":false,"level":"info","message":"[DEBUG] Strategy Options Mapped:","securityConfig":{"authnRequestsSigned":false,"clockSkew":300,"digestAlgorithm":"sha256","rejectUnsolicitedResponsesWithInResponseTo":false,"requestedAuthnContext":false,"requestedAuthnContextComparison":"exact","signatureAlgorithm":"sha256","validateAudience":false,"validateDestination":false,"validateIssuer":false,"wantAssertionsEncrypted":false,"wantAssertionsSigned":true,"wantMessagesSigned":false,"wantNameIdEncrypted":false},"service":"easy-saml-service","timestamp":"2026-02-13T11:23:12.322Z"}
+{"authnRequestsSigned":false,"cert":"EXISTS","entryPoint":"https://id.mkaya.alkanlab.com/saml/aa6e4ea1-e476-7203-ad5c-e21e63cd1a88/login","idpCert":"EXISTS","issuer":"passport-saml","level":"info","message":"SAML Strategy Options (Final):","service":"easy-saml-service","timestamp":"2026-02-13T11:23:12.324Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:24:14.126Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-02-13T11:24:14.142Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-02-13T11:24:15.404Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:24:15.409Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:24:16.810Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:24:19.415Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:27:08.241Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:27:18.849Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-02-13T11:42:16.722Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-02-13T11:42:20.709Z"}
