@@ -1,84 +1,220 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <%= title %>
-    </title>
+    <title><%= title %></title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 1rem;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            max-width: 850px;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+        }
+        @media (max-width: 768px) {
+            .login-card {
+                flex-direction: column;
+            }
+            .login-left {
+                padding: 1.5rem !important;
+            }
+            .login-right {
+                padding: 1.5rem !important;
+            }
+        }
+        .login-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2.5rem 2rem;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .login-right {
+            padding: 2.5rem 2rem;
+            color: #2b2b2b;
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 0.6rem 0.8rem;
+            background: #f4f6f9;
+            border: 1px solid #e1e5eb;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            background: #fff;
+        }
+        .btn-custom {
+            border-radius: 12px;
+            padding: 0.6rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(102, 126, 234, 0.6);
+        }
+        .sso-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 12px;
+            padding: 0.6rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: 2px solid transparent;
+        }
+        .sso-saml { background: #e8f4fd; color: #0078D4; border-color: #e8f4fd; }
+        .sso-saml:hover { background: #0078D4; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(0, 120, 212, 0.3); }
+        .sso-oauth { background: #fff4e5; color: #F25022; border-color: #fff4e5; }
+        .sso-oauth:hover { background: #F25022; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(242, 80, 34, 0.3); }
+        .sso-jwt { background: #f3f0ff; color: #7952B3; border-color: #f3f0ff;}
+        .sso-jwt:hover { background: #7952B3; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(121, 82, 179, 0.3); }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.2rem 0 1rem 0;
+            color: #a0aab5;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        .divider:not(:empty)::before { margin-right: 1em; }
+        .divider:not(:empty)::after { margin-left: 1em; }
+        
+        .badge-soft {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            backdrop-filter: blur(5px);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+    </style>
 </head>
+<body>
+    <div class="login-card">
+        <!-- Left Side: Branding -->
+        <div class="login-left">
+            <h1 class="fw-bold mb-2 display-6" style="letter-spacing: -1px;"><i class="bi bi-shield-lock-fill me-3"></i>IAMERT</h1>
+            <p class="fs-6 mb-3 fw-light" style="opacity: 0.9; line-height: 1.5;">
+                SAML, OAuth 2.0 ve OIDC altyapılarınızı doğrulayabileceğiniz güvenli SSO test merkezi.
+            </p>
+            <div class="mt-auto">
+                <span class="badge badge-soft px-3 py-2 rounded-pill mb-2"><i class="bi bi-person-badge me-2"></i>IAM Engineer Hub</span>
+                <p class="mb-0" style="opacity: 0.85; font-size: 0.9rem;">Created by <strong>Ömer Mert Kaya</strong></p>
+                <a href="https://omermertkaya.github.io" target="_blank" class="text-white small text-decoration-none border-bottom border-light pb-1" style="opacity: 0.85;">omermertkaya.github.io</a>
+            </div>
+        </div>
 
-<body class="bg-light">
-    <div class="container d-flex flex-column justify-content-center align-items-center vh-100">
-        <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
-            <div class="card-body">
-                <div class="text-center mb-4 text-primary">
-                    <i class="bi bi-shield-lock-fill display-4"></i>
-                    <h3 class="fw-bold mt-2">IAMERT SAML</h3>
+        <!-- Right Side: Login Options -->
+        <div class="login-right">
+            <h3 class="fw-bold mb-1">Giriş Yapın</h3>
+            <p class="text-muted mb-3 small">Lokal veya Kurumsal Kimlik (SSO) ile devam edin.</p>
+
+            <% if (locals.message) { %>
+                <div class="alert alert-danger bg-danger text-white border-0 shadow-sm rounded-3 py-2 px-3 small d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i> <div><%= message %></div>
                 </div>
-                <h5 class="text-center text-muted mb-4">
-                    <%= title %>
-                </h5>
+            <% } %>
 
-                <% if (locals.defaultUser) { %>
-                    <div class="alert alert-info border-start border-4 border-info" role="alert">
-                        <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle-fill me-2"></i>Eğitim Modu</h6>
-                        <hr class="my-2">
-                        <small class="d-block"><strong>Kullanıcı:</strong>
-                            <%= defaultUser.username %>
-                        </small>
-                        <small class="d-block"><strong>Şifre:</strong>
-                            <%= defaultUser.password %>
-                        </small>
+            <% if (locals.defaultUser) { %>
+                <div class="alert alert-info border-0 shadow-sm rounded-3 py-2 px-3 mb-3" style="background: #e8f4fd; color: #0078D4;" role="alert">
+                    <h6 class="fw-bold mb-2 small"><i class="bi bi-info-circle-fill me-2"></i>Eğitim Modu Aktif</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="small w-100 font-monospace">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-1 text-dark"><strong>Kullanıcı:</strong> <%= defaultUser.username %></li>
+                                <li class="text-dark"><strong>Şifre:</strong> <%= defaultUser.password %></li>
+                            </ul>
+                        </div>
                     </div>
-                    <% } %>
+                </div>
+            <% } %>
 
-                        <% if (locals.message) { %>
-                            <div class="alert alert-danger" role="alert">
-                                <%= message %>
-                            </div>
-                            <% } %>
+            <form action="/login" method="POST" class="mb-2">
+                <div class="mb-2">
+                    <label for="username" class="form-label fw-semibold small text-muted text-uppercase mb-1" style="letter-spacing: 0.5px;">Kullanıcı Adı</label>
+                    <input type="text" class="form-control" id="username" name="username" value="<%= locals.defaultUser ? defaultUser.username : '' %>" required placeholder="Kullanıcı Adı">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label fw-semibold small text-muted text-uppercase mb-1" style="letter-spacing: 0.5px;">Şifre</label>
+                    <input type="password" class="form-control" id="password" name="password" value="<%= locals.defaultUser ? defaultUser.password : '' %>" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 btn-custom" style="background: #667eea;">
+                    Lokal Giriş Yap <i class="bi bi-arrow-right fw-bold ms-1"></i>
+                </button>
+            </form>
 
-                                <form action="/login" method="POST">
-                                    <div class="mb-3">
-                                        <label for="username" class="form-label">Kullanıcı Adı</label>
-                                        <input type="text" class="form-control" id="username" name="username"
-                                            value="<%= locals.defaultUser ? defaultUser.username : '' %>" required>
-                                    </div>
+            <div class="divider small fw-bold text-uppercase" style="letter-spacing: 1px;">Veya SSO Kullanın</div>
 
-                                    <div class="mb-3">
-                                        <label for="password" class="form-label">Şifre</label>
-                                        <input type="password" class="form-control" id="password" name="password"
-                                            value="<%= locals.defaultUser ? defaultUser.password : '' %>" required>
-                                    </div>
+            <div class="d-flex flex-column">
+                <a href="/login/sso" class="sso-btn sso-saml">
+                    <i class="bi bi-diagram-3-fill fs-5"></i> SAML 2.0 ile Giriş
+                </a>
+                <a href="/login/oauth" class="sso-btn sso-oauth">
+                    <i class="bi bi-link-45deg fs-4"></i> OAuth 2.0 ile Giriş
+                </a>
+                <a href="/login/jwt" class="sso-btn sso-jwt">
+                    <i class="bi bi-key-fill fs-5"></i> OIDC (JWT) ile Giriş
+                </a>
+            </div>
 
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary btn-lg">Giriş Yap</button>
-                                    </div>
-                                </form>
-
-                                <div class="text-center my-3 text-muted">Veya</div>
-
-                                <div class="d-grid gap-2">
-                                    <a href="/login/sso" class="btn btn-success btn-lg">SSO ile Giriş Yap (SAML)</a>
-                                </div>
-
-                                <div class="text-center mt-4">
-                                    <a href="/" class="text-decoration-none">Ana Sayfaya Dön</a>
-                                </div>
-
-                                <footer class="text-center mt-3 text-muted small">
-                                    <p class="mb-1">Created by <strong>Ömer Mert Kaya</strong> <span
-                                            class="badge bg-light text-secondary border">IAM Engineer</span></p>
-                                    <a href="https://omermertkaya.github.io" target="_blank"
-                                        class="text-decoration-none">omermertkaya.github.io</a>
-                                </footer>
+            <div class="text-center mt-3 pt-2">
+                <a href="/" class="text-muted text-decoration-none fw-semibold"><i class="bi bi-arrow-left me-1"></i>Ana Sayfa</a>
             </div>
         </div>
     </div>
@@ -86,5 +222,4 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

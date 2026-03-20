@@ -1,0 +1,19 @@
+{
+  "authorizationURL": "https://provider.com/jwt/authorize",
+  "tokenURL": "https://provider.com/jwt/token",
+  "logoutURL": "",
+  "userInfoURL": "",
+  "jwksURL": "",
+  "clientID": "",
+  "clientSecret": "",
+  "scope": "openid offline_access",
+  "callbackURL": "http://localhost:3000/login/jwt/callback",
+  "attributeMapping": {
+    "email": "Email",
+    "username": "UserName",
+    "firstName": "",
+    "lastName": "",
+    "department": "",
+    "roles": ""
+  }
+}

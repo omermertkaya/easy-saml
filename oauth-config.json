@@ -1,0 +1,16 @@
+{
+  "authorizationURL": "https://provider.com/oauth2/authorize",
+  "tokenURL": "https://provider.com/oauth2/token",
+  "clientID": "",
+  "clientSecret": "",
+  "callbackURL": "http://localhost:3000/login/oauth/callback",
+  "userInfoURL": "",
+  "attributeMapping": {
+    "email": "Email",
+    "username": "UserName",
+    "firstName": "",
+    "lastName": "",
+    "department": "",
+    "roles": ""
+  }
+}

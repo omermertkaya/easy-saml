@@ -604,6 +604,34 @@
                                         </div>
                                         <% } %>
 
+                                    <!-- Eğitim Modu: OAuth Akışı ve Detayları -->
+                                    <% if (user.source === 'oauth') { %>
+                                        <div class="col-md-8 mt-4">
+                                            <div class="card shadow-sm border-0 border-top border-4 border-info">
+                                                <div class="card-header bg-white pt-4 pb-2">
+                                                    <h4 class="fw-bold text-info"><i class="bi bi-shield-lock-fill me-2"></i>OAuth 2.0 Analizi</h4>
+                                                    <p class="text-muted small">Bu oturum OAuth 2.0 protokolü kullanılarak gerçekleşti.</p>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="accordion" id="accordionOauth">
+                                                        <div class="accordion-item">
+                                                            <h2 class="accordion-header" id="headingOauthOne">
+                                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOauthOne">
+                                                                    <i class="bi bi-code-slash me-2 text-primary"></i> Çözümlenmiş Profil (JSON)
+                                                                </button>
+                                                            </h2>
+                                                            <div id="collapseOauthOne" class="accordion-collapse collapse" data-bs-parent="#accordionOauth">
+                                                                <div class="accordion-body bg-light">
+                                                                    <pre class="mb-0" style="max-height: 300px; overflow-y: auto;"><code class="small language-json"><%= JSON.stringify(user.oauthProfile, null, 2) %></code></pre>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% } %>
+
                                             <!-- Live Events Log -->
                                             <div class="col-md-8 mt-4">
                                                 <div class="card shadow-sm border-0 border-top border-4 border-warning">

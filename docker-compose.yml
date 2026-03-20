@@ -7,15 +7,17 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # SAML konfigürasyonunun kalıcı olması için volume mapping
+      # Tüm IdP, OAuth 2.0 ve OIDC (JWT) ayarlarının kalıcı olması için konfigürasyon dosyaları bağlanır
       - ./saml-config.json:/app/saml-config.json
-      # Görev takibinin kalıcı olması için
+      - ./oauth-config.json:/app/oauth-config.json
+      - ./jwt-config.json:/app/jwt-config.json
+      # Görev (Eğitim) takibinin cihaz başlatıldığında sıfırlanmaması için
       - ./src/tasks.json:/app/src/tasks.json
-      # SAML olay kaydı ve sistem logları için
+      # Olay kayıtları ve sistem loglarının depolanması için
       - ./saml-events.json:/app/saml-events.json
       - ./logs:/app/logs
     environment:
       - PORT=3000
-      - SESSION_SECRET=bu_gizli_anahtar_degistirilmeli_docker
+      - SESSION_SECRET=easy_saml_gizli_session_anahtari_degistiriniz
       - NODE_ENV=production
     restart: always

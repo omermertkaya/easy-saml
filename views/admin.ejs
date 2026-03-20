@@ -36,6 +36,34 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
+                <!-- Main Top-Level Tabs -->
+                <ul class="nav nav-tabs mb-4" id="mainAdminTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold px-4 text-dark" id="main-saml-tab" data-bs-toggle="tab" data-bs-target="#main-saml" type="button" role="tab" aria-controls="main-saml" aria-selected="true">
+                            <i class="bi bi-gear-fill me-2 text-primary"></i>SAML Yapılandırması
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 text-dark" id="main-oauth-tab" data-bs-toggle="tab" data-bs-target="#main-oauth" type="button" role="tab" aria-controls="main-oauth" aria-selected="false">
+                            <i class="bi bi-shield-lock me-2 text-info"></i>OAuth 2.0 Yapılandırması
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 text-dark" id="main-jwt-tab" data-bs-toggle="tab" data-bs-target="#main-jwt" type="button" role="tab" aria-controls="main-jwt" aria-selected="false">
+                            <i class="bi bi-key me-2 text-warning"></i>JWT Yapılandırması
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 text-dark" id="main-edu-tab" data-bs-toggle="tab" data-bs-target="#main-edu" type="button" role="tab" aria-controls="main-edu" aria-selected="false">
+                            <i class="bi bi-mortarboard me-2 text-success"></i>Eğitim & Sistem
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="mainAdminTabsContent">
+                    <!-- SAML Pane -->
+                    <div class="tab-pane fade show active" id="main-saml" role="tabpanel" aria-labelledby="main-saml-tab">
+
                 <div class="card shadow border-0">
                     <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
                         <h3 class="fw-bold text-dark"><i class="bi bi-gear-fill me-2 text-primary"></i>SAML
@@ -74,43 +102,58 @@
                                                     ayarlarınız şu şekilde olmalıdır:</p>
                                                 <ul class="small mb-0 text-dark">
                                                     <li><strong>ACS URL (Callback):</strong> <code
-                                                            class="user-select-all fw-bold"><%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %></code>
+                                                            class="user-select-all fw-bold" id="hint_acsUrl"><%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %></code>
+                                                    </li>
+                                                    <li><strong>SP Metadata URL:</strong> <code
+                                                            class="user-select-all fw-bold" id="hint_metadataUrl"><%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/saml/metadata') : 'http://localhost:3000/saml/metadata' %></code>
                                                     </li>
                                                     <li><strong>Entity ID (Audience):</strong> <code
-                                                            class="user-select-all fw-bold"><%= config.sp ? config.sp.entityId : 'passport-saml' %></code>
+                                                            class="user-select-all fw-bold" id="hint_entityId"><%= (config.sp && config.sp.entityId && config.sp.entityId.trim() && config.sp.entityId.trim() !== 'passport-saml') ? config.sp.entityId : ((config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/saml/metadata') : 'http://localhost:3000/saml/metadata') %></code>
                                                     </li>
                                                 </ul>
                                             </div>
                                         </div>
 
                                         <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <label for="sp_baseUrl" class="form-label fw-bold small text-uppercase text-secondary">Sistem Domain Adresi (Base URL)</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="url" class="form-control font-monospace border-primary"
+                                                        id="sp_baseUrl" name="sp_baseUrl"
+                                                        value="<%= (config.sp && config.sp.baseUrl) ? config.sp.baseUrl : 'http://localhost:3000' %>"
+                                                        placeholder="Örn: https://sso.mycompany.com"
+                                                        oninput="const base = this.value.replace(/\/$/, ''); document.getElementById('sp_entityId').value = base + '/saml/metadata'; document.getElementById('sp_acsUrl').value = base + '/login/sso/callback'; document.getElementById('hint_acsUrl').innerText = base + '/login/sso/callback'; document.getElementById('hint_metadataUrl').innerText = base + '/saml/metadata'; document.getElementById('hint_entityId').innerText = base + '/saml/metadata';">
+                                                    <button class="btn btn-outline-secondary" type="button"
+                                                        onclick="navigator.clipboard.writeText(document.getElementById('sp_baseUrl').value)"
+                                                        title="Kopyala"><i class="bi bi-clipboard"></i></button>
+                                                </div>
+                                                <div class="form-text small text-primary fw-semibold">Domain adınızı buraya yazdığınızda <b>Callback URL</b> ve <b>Entity ID</b> adresleri otomatik güncellenir.</div>
+                                            </div>
                                             <div class="col-md-6">
-                                                <label for="sp_entityId"
-                                                    class="form-label fw-bold small text-uppercase text-secondary">Entity
-                                                    ID / Issuer</label>
+                                                <label for="sp_acsUrl" class="form-label fw-bold small text-uppercase text-primary">ACS URL / Callback URL (Otomatik)</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control font-monospace border-primary bg-light text-primary"
+                                                        id="sp_acsUrl" name="sp_acsUrl" style="cursor: not-allowed;"
+                                                        value="<%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %>"
+                                                        readonly>
+                                                    <button class="btn btn-primary shadow-none" type="button"
+                                                        onclick="navigator.clipboard.writeText(document.getElementById('sp_acsUrl').value)"
+                                                        title="Kopyala"><i class="bi bi-clipboard"></i></button>
+                                                </div>
+                                                <div class="form-text text-muted small">IdP'nin kullanıcıyı geri döndüreceği hedeftir. Yazılım mimarisi gereği yol daima <code class="fw-bold">/login/sso/callback</code> olarak yapılandırılmıştır.</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="sp_entityId" class="form-label fw-bold small text-uppercase text-secondary">Entity ID / Issuer</label>
                                                 <div class="input-group input-group-sm">
                                                     <input type="text" class="form-control font-monospace"
                                                         id="sp_entityId" name="sp_entityId"
-                                                        value="<%= config.sp ? config.sp.entityId : 'passport-saml' %>"
+                                                        value="<%= (config.sp && config.sp.entityId && config.sp.entityId.trim() && config.sp.entityId.trim() !== 'passport-saml') ? config.sp.entityId : ((config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/saml/metadata') : 'http://localhost:3000/saml/metadata') %>"
                                                         required>
                                                     <button class="btn btn-outline-secondary" type="button"
                                                         onclick="navigator.clipboard.writeText(document.getElementById('sp_entityId').value)"
                                                         title="Kopyala"><i class="bi bi-clipboard"></i></button>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="sp_acsUrl"
-                                                    class="form-label fw-bold small text-uppercase text-secondary">ACS
-                                                    URL / Callback URL</label>
-                                                <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control font-monospace"
-                                                        id="sp_acsUrl" name="sp_acsUrl"
-                                                        value="<%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %>"
-                                                        required>
-                                                    <button class="btn btn-outline-secondary" type="button"
-                                                        onclick="navigator.clipboard.writeText(document.getElementById('sp_acsUrl').value)"
-                                                        title="Kopyala"><i class="bi bi-clipboard"></i></button>
-                                                </div>
+                                                <div class="form-text text-muted small">Uygulamanızın (Servis Sağlayıcının) kimliğidir. Genellikle Metadata URL'si ile aynıdır.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -143,12 +186,6 @@
                                                 data-bs-target="#mapping" type="button" role="tab"
                                                 aria-controls="mapping" aria-selected="false"><i
                                                     class="bi bi-arrow-left-right me-2"></i>Eşleştirme</button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="edu-tab" data-bs-toggle="tab"
-                                                data-bs-target="#edu" type="button" role="tab" aria-controls="edu"
-                                                aria-selected="false"><i
-                                                    class="bi bi-mortarboard me-2"></i>Eğitim</button>
                                         </li>
                                     </ul>
 
@@ -355,39 +392,221 @@
                                                     <% }); %>
                                             </div>
                                         </div>
-                                    </div>
-                    </div>
-
-                </div>
-
-                <!-- Education Tab Content -->
-                <div class="tab-pane fade" id="edu" role="tabpanel" aria-labelledby="edu-tab">
-                    <div class="alert alert-light border small mt-3">
-                        <i class="bi bi-info-circle me-2 text-primary"></i>
-                        Bu bölümde SAML entegrasyonu ile ilgili eğitim görevlerini yönetebilirsiniz.
-                    </div>
-
-                    <div class="card border-danger shadow-sm mt-4">
-                        <div class="card-header bg-danger text-white">
-                            <h6 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Tehlikeli
-                                Bölge</h6>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title text-danger">Görev İlerlemelerini Sıfırla</h5>
-                            <p class="card-text text-muted small">Tüm tamamlanmış görevleri (IdP Setup, Attribute
-                                Mapping vb.) sıfırlar ve başlangıç durumuna döndürür. Bu işlem geri alınamaz.</p>
-                            <button type="button" class="btn btn-outline-danger"
-                                onclick="if(confirm('Tüm görev ilerlemelerini sıfırlamak istediğinize emin misiniz?')) document.getElementById('resetTasksForm').submit();">
-                                <i class="bi bi-arrow-counterclockwise me-1"></i> Tüm Görevleri Sıfırla
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                                        
+                                </div><!-- End configTabsContent -->
 
                 </form>
             </div>
-
         </div>
+        </div><!-- End SAML Pane -->
+
+        <!-- OAuth Pane -->
+        <div class="tab-pane fade" id="main-oauth" role="tabpanel" aria-labelledby="main-oauth-tab">
+        <!-- OAuth Configuration Card -->
+        <div class="card shadow border-0">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
+                <h3 class="fw-bold text-dark"><i class="bi bi-shield-lock me-2 text-info"></i>OAuth 2.0 Yapılandırması</h3>
+                <p class="text-muted">OAuth 2.0 sağlayıcınızın (IdP) ayarlarını buradan yapılandırabilirsiniz.</p>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form id="oauthConfigForm" action="/admin/save-oauth" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="oauth_authorizationURL" class="form-label fw-bold small">Authorization URL</label>
+                            <input type="url" class="form-control" id="oauth_authorizationURL" name="oauth_authorizationURL" value="<%= locals.oauthConfig ? oauthConfig.authorizationURL : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oauth_tokenURL" class="form-label fw-bold small">Token URL</label>
+                            <input type="url" class="form-control" id="oauth_tokenURL" name="oauth_tokenURL" value="<%= locals.oauthConfig ? oauthConfig.tokenURL : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oauth_clientID" class="form-label fw-bold small">Client ID</label>
+                            <input type="text" class="form-control font-monospace" id="oauth_clientID" name="oauth_clientID" value="<%= locals.oauthConfig ? oauthConfig.clientID : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oauth_clientSecret" class="form-label fw-bold small">Client Secret</label>
+                            <input type="text" class="form-control font-monospace" id="oauth_clientSecret" name="oauth_clientSecret" value="<%= locals.oauthConfig ? oauthConfig.clientSecret : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oauth_userInfoURL" class="form-label fw-bold small">User Info URL (Opsiyonel)</label>
+                            <input type="url" class="form-control font-monospace" id="oauth_userInfoURL" name="oauth_userInfoURL" value="<%= locals.oauthConfig ? oauthConfig.userInfoURL : '' %>" placeholder="https://provider.com/userinfo">
+                            <div class="form-text" style="font-size: 0.75rem;">IdP'den Access Token ile ek profil detayı çekmek için.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oauth_callbackURL" class="form-label fw-bold small">Callback URL</label>
+                            <input type="url" class="form-control font-monospace" id="oauth_callbackURL" name="oauth_callbackURL" value="<%= locals.oauthConfig ? oauthConfig.callbackURL : 'http://localhost:3000/login/oauth/callback' %>" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold text-secondary text-uppercase small mb-3"><i class="bi bi-arrow-left-right me-1"></i>OAuth Attribute Eşleştirme</h6>
+                    <div class="alert alert-light border small">
+                        IdP'den (UserInfo'dan donen JSON'dan) dönen kullanıcı özelliklerini esnek bir şekilde belirtin.
+                        İç içe değerler için <code>Nokta(.)</code> notasyonunu kullanabilirsiniz (Örn: <code>Attributes.UserPrincipalName</code>).
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="oauth_attr_email" class="form-label fw-bold small">E-Posta (Email)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oauth_attr_email" name="oauth_attr_email" value="<%= (locals.oauthConfig && locals.oauthConfig.attributeMapping) ? oauthConfig.attributeMapping.email : 'Email' %>" placeholder="Email">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oauth_attr_username" class="form-label fw-bold small">Kullanıcı Adı (Username)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oauth_attr_username" name="oauth_attr_username" value="<%= (locals.oauthConfig && locals.oauthConfig.attributeMapping) ? oauthConfig.attributeMapping.username : 'UserName' %>" placeholder="UserName">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oauth_attr_firstName" class="form-label fw-bold small">Ad (First Name)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oauth_attr_firstName" name="oauth_attr_firstName" value="<%= (locals.oauthConfig && locals.oauthConfig.attributeMapping) ? oauthConfig.attributeMapping.firstName : '' %>" placeholder="FirstName">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oauth_attr_lastName" class="form-label fw-bold small">Soyad (Last Name)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oauth_attr_lastName" name="oauth_attr_lastName" value="<%= (locals.oauthConfig && locals.oauthConfig.attributeMapping) ? oauthConfig.attributeMapping.lastName : '' %>" placeholder="LastName">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oauth_attr_department" class="form-label fw-bold small">Departman</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oauth_attr_department" name="oauth_attr_department" value="<%= (locals.oauthConfig && locals.oauthConfig.attributeMapping) ? oauthConfig.attributeMapping.department : '' %>" placeholder="Department">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oauth_attr_roles" class="form-label fw-bold small">Roller (Roles)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oauth_attr_roles" name="oauth_attr_roles" value="<%= (locals.oauthConfig && locals.oauthConfig.attributeMapping) ? oauthConfig.attributeMapping.roles : '' %>" placeholder="Roles">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div><!-- End OAuth Pane -->
+
+        <!-- JWT Pane -->
+        <div class="tab-pane fade" id="main-jwt" role="tabpanel" aria-labelledby="main-jwt-tab">
+        <div class="card shadow border-0">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
+                <h3 class="fw-bold text-dark"><i class="bi bi-key me-2 text-warning"></i>JWT (OIDC) Yapılandırması</h3>
+                <p class="text-muted">IdP'nizdeki JWT/OIDC entegrasyonuna ait bilgileri girin.</p>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form id="jwtConfigForm" action="/admin/save-jwt" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_authorizationURL" class="form-label fw-bold small">Authorize Url</label>
+                            <input type="url" class="form-control font-monospace" id="jwt_authorizationURL" name="jwt_authorizationURL" value="<%= locals.jwtConfig ? jwtConfig.authorizationURL : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_tokenURL" class="form-label fw-bold small">Token Url</label>
+                            <input type="url" class="form-control font-monospace" id="jwt_tokenURL" name="jwt_tokenURL" value="<%= locals.jwtConfig ? jwtConfig.tokenURL : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_userInfoURL" class="form-label fw-bold small">User Info Url</label>
+                            <input type="url" class="form-control font-monospace" id="jwt_userInfoURL" name="jwt_userInfoURL" value="<%= locals.jwtConfig ? jwtConfig.userInfoURL : '' %>" >
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_logoutURL" class="form-label fw-bold small">Logout Url</label>
+                            <input type="url" class="form-control font-monospace" id="jwt_logoutURL" name="jwt_logoutURL" value="<%= locals.jwtConfig ? jwtConfig.logoutURL : '' %>" >
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_jwksURL" class="form-label fw-bold small">JSON Web Key Set (JWKS)</label>
+                            <input type="url" class="form-control font-monospace" id="jwt_jwksURL" name="jwt_jwksURL" value="<%= locals.jwtConfig ? jwtConfig.jwksURL : '' %>" >
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_clientID" class="form-label fw-bold small">Client Id</label>
+                            <input type="text" class="form-control font-monospace" id="jwt_clientID" name="jwt_clientID" value="<%= locals.jwtConfig ? jwtConfig.clientID : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_clientSecret" class="form-label fw-bold small">Shared Secret</label>
+                            <input type="text" class="form-control font-monospace" id="jwt_clientSecret" name="jwt_clientSecret" value="<%= locals.jwtConfig ? jwtConfig.clientSecret : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jwt_scope" class="form-label fw-bold small">Scope</label>
+                            <input type="text" class="form-control font-monospace" id="jwt_scope" name="jwt_scope" value="<%= locals.jwtConfig ? jwtConfig.scope : 'openid offline_access' %>" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="jwt_callbackURL" class="form-label fw-bold small text-primary">Callback URL (SP)</label>
+                            <input type="url" class="form-control font-monospace bg-light" id="jwt_callbackURL" name="jwt_callbackURL" value="<%= locals.jwtConfig ? jwtConfig.callbackURL : 'http://localhost:3000/login/jwt/callback' %>" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold text-secondary text-uppercase small mb-3"><i class="bi bi-arrow-left-right me-1"></i>JWT Attribute Eşleştirme</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="jwt_attr_email" class="form-label fw-bold small">E-Posta (Email)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="jwt_attr_email" name="jwt_attr_email" value="<%= (locals.jwtConfig && locals.jwtConfig.attributeMapping) ? jwtConfig.attributeMapping.email : 'Email' %>" placeholder="Email">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jwt_attr_username" class="form-label fw-bold small">Kullanıcı Adı (Username)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="jwt_attr_username" name="jwt_attr_username" value="<%= (locals.jwtConfig && locals.jwtConfig.attributeMapping) ? jwtConfig.attributeMapping.username : 'UserName' %>" placeholder="UserName">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jwt_attr_firstName" class="form-label fw-bold small">Ad (First Name)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="jwt_attr_firstName" name="jwt_attr_firstName" value="<%= (locals.jwtConfig && locals.jwtConfig.attributeMapping) ? jwtConfig.attributeMapping.firstName : '' %>" placeholder="FirstName">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jwt_attr_lastName" class="form-label fw-bold small">Soyad (Last Name)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="jwt_attr_lastName" name="jwt_attr_lastName" value="<%= (locals.jwtConfig && locals.jwtConfig.attributeMapping) ? jwtConfig.attributeMapping.lastName : '' %>" placeholder="LastName">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jwt_attr_department" class="form-label fw-bold small">Departman (Department)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="jwt_attr_department" name="jwt_attr_department" value="<%= (locals.jwtConfig && locals.jwtConfig.attributeMapping) ? jwtConfig.attributeMapping.department : '' %>" placeholder="Department">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="jwt_attr_roles" class="form-label fw-bold small">Roller (Roles)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="jwt_attr_roles" name="jwt_attr_roles" value="<%= (locals.jwtConfig && locals.jwtConfig.attributeMapping) ? jwtConfig.attributeMapping.roles : '' %>" placeholder="Roles">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div><!-- End JWT Pane -->
+
+        <!-- Eğitim & Sistem Pane -->
+        <div class="tab-pane fade" id="main-edu" role="tabpanel" aria-labelledby="main-edu-tab">
+        <div class="card shadow border-0">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
+                <h3 class="fw-bold text-dark"><i class="bi bi-mortarboard me-2 text-success"></i>Eğitim ve Sistem Ayarları</h3>
+                <p class="text-muted">Bu bölümde eğitim / onboarding görevlerini sıfırlayabilir veya uygulamanın tamamını ilk haline döndürebilirsiniz.</p>
+            </div>
+            <div class="card-body p-4 pt-2">
+                
+                <div class="card border-warning shadow-sm mt-3">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Eğitim Bölümü</h6>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">Eğitim Görevlerini Sıfırla</h5>
+                        <p class="card-text text-muted small">Tamamladığınız (IdP entegrasyonu başarıyla okutuldu vb.) eğitim adım tiplerini siler.</p>
+                        <button type="button" class="btn btn-outline-warning text-dark fw-bold"
+                            onclick="if(confirm('Tüm eğitim görevlerini sıfırlamak istediğinize emin misiniz?')) document.getElementById('resetTasksForm').submit();">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Tüm Eğitim Görevlerini Sıfırla
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card border-danger shadow-sm mt-4">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>İleri Seviye Sıfırlama (Tehlikeli Bölge)</h6>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">SAML Yapılandırmasını Kısmi Sıfırla</h5>
+                        <p class="card-text text-muted small">Sadece IdP, Güvenlik veya Eşleştirme işlemlerini varsayılan template haline getirir.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('IdP ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetScope').value='idp'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-arrow-counterclockwise me-1"></i> IdP Sekmesini Sıfırla</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('Güvenlik ayarlarını sıfırlamak istediğine emin misiniz?')) { document.getElementById('resetScope').value='security'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-shield-slash me-1"></i> Güvenlik Sekmesini Sıfırla</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('Eşleştirme ayarlarını sıfırlamak istediğine emin misiniz?')) { document.getElementById('resetScope').value='mapping'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-arrow-left-right me-1"></i> Eşleştirme/Yetki Sekmesini Sıfırla</button>
+                            <button type="button" class="btn btn-danger btn-sm fw-bold shadow-sm" onclick="if(confirm('TÜM SAML ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetScope').value='all'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-trash3 me-1"></i> Tüm SAML Ayarlarını Sıfırla</button>
+                        </div>
+
+                        <hr class="my-4">
+                        <h5 class="card-title text-danger">TÜM PROJE VERİLERİNİ SIFIRLA (FACTORY RESET)</h5>
+                        <p class="card-text text-muted small"><strong>GERİ DÖNÜŞÜ YOKTUR!</strong> SAML, OAuth 2.0, JWT, Görevler, Kayıtlı Tüm IdP bilgileri ve alınan Session/Event logları <b>tamamen kalıcı olarak silinir</b>.</p>
+                        <button type="button" class="btn btn-dark w-100 fw-bold shadow-sm py-2" onclick="if(confirm('UYARI: Tüm sistemi fabrika ayarlarına döndürmek istediğinize emin misiniz?!!! (TÜM VERİLER SİLİNİR)')) { document.getElementById('factoryResetForm').submit(); }">
+                            <i class="bi bi-x-octagon-fill me-2 text-danger"></i> SİSTEMİ FABRİKA AYARLARINA DÖNDÜR
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </div><!-- End Eğitim Pane -->
+
+    </div><!-- End Tab Content -->
     </div>
     </div>
 
@@ -398,9 +617,17 @@
                 <div class="col-lg-10 d-flex justify-content-between align-items-center">
                     <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Değişiklikleri kaydetmeyi
                         unutmayın.</small>
-                    <button type="submit" form="samlConfigForm" class="btn btn-primary px-4 fw-bold shadow-sm">
-                        <i class="bi bi-save me-2"></i>Ayarları Kaydet ve Uygula
-                    </button>
+                    <div id="sticky-buttons">
+                        <button type="submit" form="samlConfigForm" class="btn btn-primary px-4 fw-bold shadow-sm" id="btn-save-saml">
+                            <i class="bi bi-save me-2"></i>SAML Ayarlarını Kaydet
+                        </button>
+                        <button type="submit" form="oauthConfigForm" class="btn btn-info text-white px-4 fw-bold shadow-sm d-none" id="btn-save-oauth">
+                            <i class="bi bi-save me-2"></i>OAuth Ayarlarını Kaydet
+                        </button>
+                        <button type="submit" form="jwtConfigForm" class="btn btn-warning text-dark px-4 fw-bold shadow-sm d-none" id="btn-save-jwt">
+                            <i class="bi bi-save me-2"></i>JWT Ayarlarını Kaydet
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -412,7 +639,54 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var samlTab = document.getElementById('main-saml-tab');
+            var oauthTab = document.getElementById('main-oauth-tab');
+            var jwtTab = document.getElementById('main-jwt-tab');
+            var eduTab = document.getElementById('main-edu-tab');
+            
+            var btnSaml = document.getElementById('btn-save-saml');
+            var btnOauth = document.getElementById('btn-save-oauth');
+            var btnJwt = document.getElementById('btn-save-jwt');
+
+            function resetButtons() {
+                if (btnSaml) btnSaml.classList.add('d-none');
+                if (btnOauth) btnOauth.classList.add('d-none');
+                if (btnJwt) btnJwt.classList.add('d-none');
+            }
+
+            if (samlTab) {
+                samlTab.addEventListener('shown.bs.tab', function () {
+                    resetButtons();
+                    if (btnSaml) btnSaml.classList.remove('d-none');
+                });
+            }
+            if (oauthTab) {
+                oauthTab.addEventListener('shown.bs.tab', function () {
+                    resetButtons();
+                    if (btnOauth) btnOauth.classList.remove('d-none');
+                });
+            }
+            if (jwtTab) {
+                jwtTab.addEventListener('shown.bs.tab', function () {
+                    resetButtons();
+                    if (btnJwt) btnJwt.classList.remove('d-none');
+                });
+            }
+            if (eduTab) {
+                eduTab.addEventListener('shown.bs.tab', function () {
+                    resetButtons();
+                });
+            }
+        });
+    </script>
+
     <form id="resetTasksForm" action="/admin/reset-tasks" method="POST" style="display:none;"></form>
+    <form id="resetSamlForm" action="/admin/reset-saml" method="POST" style="display:none;">
+        <input type="hidden" id="resetScope" name="reset_scope" value="all">
+    </form>
+    <form id="factoryResetForm" action="/admin/factory-reset" method="POST" style="display:none;"></form>
 </body>
 
 </html>

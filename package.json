@@ -18,8 +18,11 @@
     "express": "^5.2.1",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
+    "jsonwebtoken": "^9.0.3",
     "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "passport-oauth2": "^1.8.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {

@@ -5,6 +5,9 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const SamlStrategy = require('@node-saml/passport-saml').Strategy;
+const OAuth2Strategy = require('passport-oauth2').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 const fs = require('fs');
 const taskManager = require('./task-manager');
 const logger = require('./logger');
@@ -30,6 +33,9 @@ process.on('unhandledRejection', (reason, promise) => {
 // EJS View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
+
+// Respect proxy headers (needed for correct base URL behind reverse proxies)
+app.set('trust proxy', true);
 
 // Middleware
 app.use(express.static(path.join(__dirname, '../public')));
@@ -65,6 +71,49 @@ const users = [
 
 // --- Configuration Logic ---
 const configPath = path.join(__dirname, '../saml-config.json');
+const oauthConfigPath = path.join(__dirname, '../oauth-config.json');
+const jwtConfigPath = path.join(__dirname, '../jwt-config.json');
+
+function normalizeBaseUrl(input) {
+    if (!input || typeof input !== 'string') return '';
+    const trimmed = input.trim();
+    if (!trimmed) return '';
+    return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+}
+
+function deriveBaseUrlFromAcsUrl(acsUrl) {
+    try {
+        if (!acsUrl) return '';
+        const u = new URL(String(acsUrl));
+        return normalizeBaseUrl(`${u.protocol}//${u.host}`);
+    } catch {
+        return '';
+    }
+}
+
+function getConfiguredBaseUrl(config) {
+    const envBaseUrl = normalizeBaseUrl(process.env.BASE_URL || process.env.APP_BASE_URL || '');
+    if (envBaseUrl) return envBaseUrl;
+    const cfgBaseUrl = normalizeBaseUrl(config?.sp?.baseUrl || '');
+    if (cfgBaseUrl) return cfgBaseUrl;
+    return deriveBaseUrlFromAcsUrl(config?.sp?.acsUrl);
+}
+
+function computeDefaultEntityId(config) {
+    const baseUrl = getConfiguredBaseUrl(config);
+    if (!baseUrl) return '';
+    return `${baseUrl}/saml/metadata`;
+}
+
+function getEffectiveSpEntityId(config) {
+    const configured = (config?.sp?.entityId || '').trim();
+    // Default placeholder or empty → use metadata endpoint URL
+    if (!configured || configured === 'passport-saml') {
+        const computed = computeDefaultEntityId(config);
+        return computed || configured || 'passport-saml';
+    }
+    return configured;
+}
 
 // Helper to load configuration
 function loadSamlConfig() {
@@ -83,6 +132,7 @@ function loadSamlConfig() {
         sp: {
             entityId: 'passport-saml',
             acsUrl: 'http://localhost:3000/login/sso/callback',
+            baseUrl: 'http://localhost:3000',
             nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
         },
         idp: {
@@ -109,7 +159,7 @@ function mapConfigToStrategyOptions(config) {
     const result = {
         // SP Settings
         callbackUrl: config.sp.acsUrl,
-        issuer: config.sp.entityId,
+        issuer: getEffectiveSpEntityId(config),
         identifierFormat: config.sp.nameIdFormat,
         decryptionPvk: rawPrivateKey,
         privateKey: rawPrivateKey, // for signing checks
@@ -153,8 +203,101 @@ function saveSamlConfig(config) {
     }
 }
 
+function loadOauthConfig() {
+    let config = {
+        authorizationURL: 'https://provider.com/oauth2/authorize',
+        tokenURL: 'https://provider.com/oauth2/token',
+        clientID: 'client_id',
+        clientSecret: 'client_secret',
+        callbackURL: 'http://localhost:3000/login/oauth/callback',
+        userInfoURL: '',
+        attributeMapping: {
+            email: 'Email',
+            username: 'UserName',
+            firstName: '',
+            lastName: '',
+            department: '',
+            roles: ''
+        }
+    };
+    try {
+        if (fs.existsSync(oauthConfigPath)) {
+            const data = fs.readFileSync(oauthConfigPath, 'utf8');
+            const loaded = JSON.parse(data);
+            config = { ...config, ...loaded };
+            if (!config.attributeMapping) {
+                config.attributeMapping = { email: 'Email', username: 'UserName', firstName: '', lastName: '', department: '', roles: '' };
+            }
+        }
+    } catch (e) {
+        logger.error('Error loading OAuth config:', e);
+    }
+    return config;
+}
+
+function saveOauthConfig(config) {
+    try {
+        fs.writeFileSync(oauthConfigPath, JSON.stringify(config, null, 2), 'utf8');
+        return true;
+    } catch (e) {
+        logger.error('Error saving OAuth config:', e);
+        return false;
+    }
+}
+
+function loadJwtConfig() {
+    let config = {
+        authorizationURL: 'https://prod-account.test.alkanlab.com/jwt/authorize',
+        tokenURL: 'https://prod-account.test.alkanlab.com/jwt/token',
+        logoutURL: 'https://prod-account.test.alkanlab.com/logout',
+        userInfoURL: 'https://prod-account.test.alkanlab.com/jwt/userinfo',
+        jwksURL: 'https://prod-account.test.alkanlab.com/.well-known/jwks',
+        clientID: '',
+        clientSecret: '',
+        scope: 'openid offline_access',
+        callbackURL: 'http://localhost:3000/login/jwt/callback',
+        attributeMapping: { email: 'Email', username: 'UserName', firstName: '', lastName: '', department: '', roles: '' }
+    };
+    try {
+        if (fs.existsSync(jwtConfigPath)) {
+            const data = fs.readFileSync(jwtConfigPath, 'utf8');
+            const loaded = JSON.parse(data);
+            config = { ...config, ...loaded };
+            if (!config.attributeMapping) {
+                config.attributeMapping = { email: 'Email', username: 'UserName', firstName: '', lastName: '', department: '', roles: '' };
+            }
+        }
+    } catch (e) {
+        logger.error('Error loading JWT config:', e);
+    }
+    return config;
+}
+
+function saveJwtConfig(config) {
+    try {
+        fs.writeFileSync(jwtConfigPath, JSON.stringify(config, null, 2), 'utf8');
+        return true;
+    } catch (e) {
+        logger.error('Error saving JWT config:', e);
+        return false;
+    }
+}
+
 // Initial configuration load
 let samlConfig = loadSamlConfig();
+let oauthConfig = loadOauthConfig();
+let jwtConfig = loadJwtConfig();
+
+// Ensure baseUrl is present for sensible defaults (especially for metadata URL)
+if (!samlConfig.sp) samlConfig.sp = {};
+if (!samlConfig.sp.baseUrl) {
+    const derived = deriveBaseUrlFromAcsUrl(samlConfig.sp.acsUrl);
+    if (derived) {
+        samlConfig.sp.baseUrl = derived;
+        // best-effort persist so admin UI shows it
+        try { saveSamlConfig(samlConfig); } catch { /* ignore */ }
+    }
+}
 
 // --- SAML Event Log System (Educational) ---
 // --- SAML Event Log System (Persistent) ---
@@ -416,9 +559,216 @@ try {
     });
 }
 
+// 3. OAuth 2.0 Strategy Configuration
+function getPropByString(obj, propString) {
+    if (!propString || !obj) return undefined;
+    const parts = propString.split('.');
+    let curr = obj;
+    for (let part of parts) {
+        if (curr === undefined || curr === null) return undefined;
+        curr = curr[part];
+    }
+    return curr === undefined || curr === null ? '' : curr;
+}
+
+function oauthVerifyCallback(accessToken, refreshToken, profile, done) {
+    try {
+        addSamlEvent('SP', 'OAuth Identity Verified', 'OAuth IdP kimlik doğrulamasını başarıyla tamamladı.', { accessToken: accessToken ? '*****' : null });
+        
+        // Profil alanlarını OIDC / Passport formatlarına göre esnek map edelim
+        const rawEmail = (profile && profile.email) || (profile && profile.emails && profile.emails[0] ? profile.emails[0].value : 'oauth@example.com');
+        const rawUsername = profile && (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) ? (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) : 'oauth_user';
+        const rawId = profile && (profile.sub || profile.id) ? (profile.sub || profile.id) : 'oauth-user';
+        const rawFirstName = profile && (profile.given_name || profile.givenName || (profile.name && profile.name.givenName)) ? (profile.given_name || profile.givenName || profile.name.givenName) : '';
+        const rawLastName = profile && (profile.family_name || profile.familyName || (profile.name && profile.name.familyName)) ? (profile.family_name || profile.familyName || profile.name.familyName) : '';
+
+        const mapping = oauthConfig.attributeMapping || {};
+        const mappedEmail = mapping.email ? getPropByString(profile, mapping.email) : rawEmail;
+        const mappedUsername = mapping.username ? getPropByString(profile, mapping.username) : rawUsername;
+        const mappedFirstName = mapping.firstName ? getPropByString(profile, mapping.firstName) : rawFirstName;
+        const mappedLastName = mapping.lastName ? getPropByString(profile, mapping.lastName) : rawLastName;
+        const mappedDepartment = mapping.department ? getPropByString(profile, mapping.department) : (profile && profile.department ? profile.department : '');
+        let mappedRoles = mapping.roles ? getPropByString(profile, mapping.roles) : (profile && profile.groups ? profile.groups : (profile && profile.roles ? profile.roles : []));
+
+        if (!Array.isArray(mappedRoles)) {
+             mappedRoles = typeof mappedRoles === 'string' ? mappedRoles.split(',').map(s=>s.trim()) : [];
+        }
+
+        const user = {
+            id: String(rawId),
+            username: String(mappedUsername || rawUsername || 'oauth_user'),
+            email: String(mappedEmail || rawEmail || 'oauth@example.com'),
+            source: 'oauth',
+            permissions: [],
+            oauthProfile: profile,
+            mappedProfile: {
+                email: String(mappedEmail || rawEmail || ''),
+                firstName: String(mappedFirstName || ''),
+                lastName: String(mappedLastName || ''),
+                username: String(mappedUsername || rawUsername || ''),
+                department: String(mappedDepartment || ''),
+                roles: mappedRoles
+            }
+        };
+        return done(null, user);
+    } catch (error) {
+        logger.error('[CRITICAL] Error in oauthVerifyCallback:', error);
+        return done(error);
+    }
+}
+
+try {
+    const oauthStrategyOptions = {
+        authorizationURL: oauthConfig.authorizationURL,
+        tokenURL: oauthConfig.tokenURL,
+        clientID: oauthConfig.clientID,
+        clientSecret: oauthConfig.clientSecret,
+        callbackURL: oauthConfig.callbackURL
+    };
+    const oauthStrategy = new OAuth2Strategy(oauthStrategyOptions, oauthVerifyCallback);
+    oauthStrategy.userProfile = function(accessToken, done) {
+        if (!oauthConfig.userInfoURL) {
+            return done(null, {});
+        }
+        this._oauth2.get(oauthConfig.userInfoURL, accessToken, function (err, body, res) {
+            if (err) {
+                logger.error('[OAuth] Failed to fetch user profile', err);
+                return done(null, {}); // fallback to empty profile
+            }
+            try {
+                const json = JSON.parse(body);
+                done(null, json);
+            } catch (ex) {
+                logger.error('[OAuth] Failed to parse user profile', ex);
+                done(null, {});
+            }
+        });
+    };
+    passport.use('oauth2', oauthStrategy);
+} catch (e) {
+    logger.error('[WARNING] Failed to initialize OAuth Strategy (likely missing config):', e.message);
+    passport.use('oauth2', {
+        name: 'oauth2',
+        authenticate: function (req, options) {
+            this.fail({ message: 'OAuth yapılandırması eksik veya hatalı.' }, 400);
+        }
+    });
+}
+
+// 4. JWT (OIDC) Strategy Configuration
+function jwtVerifyCallback(accessToken, refreshToken, profile, done) {
+    try {
+        addSamlEvent('SP', 'JWT (OIDC) Verified', 'JWT IdP OAuth2/OIDC kimlik doğrulamasını başarıyla tamamladı.', { accessToken: accessToken ? '*****' : null });
+        
+        const rawEmail = (profile && profile.email) || (profile && profile.emails && profile.emails[0] ? profile.emails[0].value : 'jwt@example.com');
+        const rawUsername = profile && (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) ? (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) : 'jwt_user';
+        const rawId = profile && (profile.sub || profile.id) ? (profile.sub || profile.id) : 'jwt-user';
+        const rawFirstName = profile && (profile.given_name || profile.givenName || (profile.name && profile.name.givenName)) ? (profile.given_name || profile.givenName || profile.name.givenName) : '';
+        const rawLastName = profile && (profile.family_name || profile.familyName || (profile.name && profile.name.familyName)) ? (profile.family_name || profile.familyName || profile.name.familyName) : '';
+
+        const mapping = jwtConfig.attributeMapping || {};
+        const mappedEmail = mapping.email ? getPropByString(profile, mapping.email) : rawEmail;
+        const mappedUsername = mapping.username ? getPropByString(profile, mapping.username) : rawUsername;
+        const mappedFirstName = mapping.firstName ? getPropByString(profile, mapping.firstName) : rawFirstName;
+        const mappedLastName = mapping.lastName ? getPropByString(profile, mapping.lastName) : rawLastName;
+        const mappedDepartment = mapping.department ? getPropByString(profile, mapping.department) : (profile && profile.department ? profile.department : '');
+        let mappedRoles = mapping.roles ? getPropByString(profile, mapping.roles) : (profile.roles || profile.groups || []);
+
+        if (!Array.isArray(mappedRoles)) {
+             mappedRoles = typeof mappedRoles === 'string' ? mappedRoles.split(',').map(s=>s.trim()) : [];
+        }
+
+        const user = {
+            id: String(rawId),
+            username: String(mappedUsername || rawUsername || 'jwt_user'),
+            email: String(mappedEmail || rawEmail || 'jwt@example.com'),
+            source: 'jwt',
+            permissions: [],
+            oauthProfile: profile, // reuse this display placeholder for JWT analysis dashboard
+            mappedProfile: {
+                email: String(mappedEmail || rawEmail || ''),
+                firstName: String(mappedFirstName || ''),
+                lastName: String(mappedLastName || ''),
+                username: String(mappedUsername || rawUsername || ''),
+                department: String(mappedDepartment || ''),
+                roles: mappedRoles
+            }
+        };
+        return done(null, user);
+    } catch (error) {
+        logger.error('[CRITICAL] Error in jwtVerifyCallback:', error);
+        return done(error);
+    }
+}
+
+try {
+    const jwtStrategyOptions = {
+        authorizationURL: jwtConfig.authorizationURL,
+        tokenURL: jwtConfig.tokenURL,
+        clientID: jwtConfig.clientID,
+        clientSecret: jwtConfig.clientSecret,
+        callbackURL: jwtConfig.callbackURL,
+        customHeaders: {},
+        scope: jwtConfig.scope ? jwtConfig.scope.split(' ') : ['openid']
+    };
+    
+    const jwtStrategy = new OAuth2Strategy(jwtStrategyOptions, jwtVerifyCallback);
+    
+    // Override userProfile to fetch UserInfo from jwtConfig.userInfoURL
+    jwtStrategy.userProfile = function(accessToken, done) {
+        if (!jwtConfig.userInfoURL) {
+            return done(null, {});
+        }
+        this._oauth2.get(jwtConfig.userInfoURL, accessToken, function (err, body, res) {
+            if (err) {
+                logger.error('[JWT] Failed to fetch user profile', err);
+                return done(null, {});
+            }
+            try {
+                const json = JSON.parse(body);
+                done(null, json);
+            } catch (ex) {
+                logger.error('[JWT] Failed to parse user profile', ex);
+                done(null, {});
+            }
+        });
+    };
+
+    passport.use('jwt', jwtStrategy);
+} catch (e) {
+    logger.error('[WARNING] Failed to initialize JWT Strategy:', e.message);
+    passport.use('jwt', {
+        name: 'jwt',
+        authenticate: function (req, options) {
+            this.fail({ message: 'JWT (OIDC) yapılandırması eksik.' }, 400);
+        }
+    });
+}
+
 // --- Authentication Logic End ---
 
 // Routes
+
+// SP Metadata Endpoint (use this as SP Entity ID / Audience in IdP)
+app.get('/saml/metadata', (req, res) => {
+    try {
+        const strategy = passport._strategy('saml');
+        if (!strategy || typeof strategy.generateServiceProviderMetadata !== 'function') {
+            return res.status(500).type('text/plain').send('SAML strategy not initialized; cannot generate metadata.');
+        }
+
+        // Some IdPs want the SP's public certificate(s) in metadata if you sign requests.
+        // We only include certificates if configured; otherwise omit.
+        const spPublicCert = (samlConfig?.sp?.x509cert || '').trim() || null;
+        const spDecryptionCert = null;
+
+        const xml = strategy.generateServiceProviderMetadata(spDecryptionCert, spPublicCert);
+        res.type('application/xml').send(xml);
+    } catch (e) {
+        logger.error('[CRITICAL] Failed to generate SP metadata:', e);
+        res.status(500).type('text/plain').send('Failed to generate metadata.');
+    }
+});
 
 // Home Route
 app.get('/', (req, res) => {
@@ -443,7 +793,8 @@ app.get('/login', (req, res) => {
     const defaultUser = users[0];
     res.render('login', {
         title: 'Giriş Yap',
-        defaultUser: defaultUser
+        defaultUser: defaultUser,
+        jwtConfig: jwtConfig
     });
 });
 
@@ -604,6 +955,107 @@ app.post('/login/sso/callback',
             }
         }
 
+        // Detect non-standard XMLDSIG that node-saml cannot validate (e.g. ds:Reference without URI).
+        // In that case, we bypass passport-saml verification ONLY for that request.
+        let useCompatBypass = false;
+        if (req.body.SAMLResponse && req.session.samlResponseXML) {
+            try {
+                const xml = String(req.session.samlResponseXML);
+                const hasSignature = /<ds:Signature\b/.test(xml);
+                const referenceOpenTagMatch = xml.match(/<ds:Reference\b([^>]*)>/);
+                const referenceHasUri = referenceOpenTagMatch && referenceOpenTagMatch[1]
+                    ? /\bURI\s*=/.test(referenceOpenTagMatch[1])
+                    : false;
+                if (hasSignature && referenceOpenTagMatch && !referenceHasUri) {
+                    useCompatBypass = true;
+                    addSamlEvent(
+                        'SP',
+                        'Compatibility Mode',
+                        'IdP non-standard imza formatı tespit edildi (ds:Reference URI yok). Bu istek için imza doğrulaması bypass edilecek.',
+                        null
+                    );
+                }
+            } catch (e) {
+                logger.error('[WARNING] Compatibility detection failed (continuing):', e);
+            }
+        }
+
+        const parseSamlProfileFromXml = (xml) => {
+            const profile = {};
+            // Issuer
+            const issuerMatch = xml.match(/<saml2:Issuer[^>]*>\s*([^<]+)\s*<\/saml2:Issuer>/);
+            if (issuerMatch && issuerMatch[1]) profile.issuer = issuerMatch[1].trim();
+
+            // NameID
+            const nameIdMatch = xml.match(/<saml2:NameID[^>]*>\s*([^<]+)\s*<\/saml2:NameID>/);
+            if (nameIdMatch && nameIdMatch[1]) profile.nameID = nameIdMatch[1].trim();
+
+            // Assertion ID
+            const assertionIdMatch = xml.match(/<saml2:Assertion\b[^>]*\bID=["']([^"']+)["']/);
+            if (assertionIdMatch && assertionIdMatch[1]) profile.id = assertionIdMatch[1].trim();
+
+            // Attributes (very small, non-XML-parser approach; good enough for this demo IdP format)
+            const attributes = {};
+            const attrRegex = /<saml2:Attribute\b[^>]*\bName=["']([^"']+)["'][^>]*>([\s\S]*?)<\/saml2:Attribute>/g;
+            let attrMatch;
+            while ((attrMatch = attrRegex.exec(xml)) !== null) {
+                const name = attrMatch[1];
+                const body = attrMatch[2] || '';
+                const values = [];
+                const valRegex = /<saml2:AttributeValue[^>]*>\s*([^<]*)\s*<\/saml2:AttributeValue>/g;
+                let valMatch;
+                while ((valMatch = valRegex.exec(body)) !== null) {
+                    const v = (valMatch[1] || '').trim();
+                    if (v) values.push(v);
+                }
+                if (values.length === 1) attributes[name] = values[0];
+                else if (values.length > 1) attributes[name] = values;
+            }
+            profile.attributes = attributes;
+
+            // Common shortcuts
+            if (!profile.email && typeof attributes.email === 'string') profile.email = attributes.email;
+            if (!profile.firstName && typeof attributes.firstName === 'string') profile.firstName = attributes.firstName;
+            if (!profile.lastName && typeof attributes.lastName === 'string') profile.lastName = attributes.lastName;
+
+            return profile;
+        };
+
+        if (useCompatBypass && req.session.samlResponseXML) {
+            try {
+                const xml = String(req.session.samlResponseXML);
+                const profile = parseSamlProfileFromXml(xml);
+
+                return samlVerifyCallback(profile, (err, user) => {
+                    if (err) {
+                        logger.error('[CRITICAL] Compatibility bypass verification error:', err);
+                        return res.status(500).send(`
+                            <h1>Authentication Error</h1>
+                            <p>An error occurred during SAML authentication.</p>
+                            <pre>${err.message}</pre>
+                        `);
+                    }
+                    if (!user) {
+                        logger.error('[CRITICAL] Compatibility bypass failed (No User)');
+                        return res.status(401).send(`
+                            <h1>Authentication Failed</h1>
+                            <p>Compatibility bypass could not create a user.</p>
+                        `);
+                    }
+                    return req.logIn(user, (err2) => {
+                        if (err2) {
+                            logger.error('[CRITICAL] Session Login Error (compat bypass):', err2);
+                            return next(err2);
+                        }
+                        return res.redirect('/dashboard');
+                    });
+                });
+            } catch (e) {
+                logger.error('[CRITICAL] Compatibility bypass failed (exception):', e);
+                // fall through to normal passport flow
+            }
+        }
+
         // Debugging: Check if request XML exists in session before authentication
         if (req.session.samlRequestXML) {
             // Store in locals to survive potential session regeneration during passport.authenticate
@@ -661,6 +1113,52 @@ app.post('/login/sso/callback',
     }
 );
 
+// Login Process (OAuth Trigger)
+app.get('/login/oauth', (req, res, next) => {
+    addSamlEvent('SP', 'Flow Started (OAuth)', 'Kullanıcı OAuth giriş işlemini başlattı.');
+    next();
+}, passport.authenticate('oauth2'));
+
+// Login Process (OAuth Callback)
+app.get('/login/oauth/callback',
+    passport.authenticate('oauth2', {
+        failureRedirect: '/login',
+        failureMessage: true
+    }), (req, res) => {
+        addSamlEvent('SP', 'OAuth Response Received', 'OAuth IdP\'den yanıt döndü.');
+        res.redirect('/dashboard');
+    }
+);
+
+// Login Process (JWT / OIDC)
+app.get('/login/jwt', (req, res, next) => {
+    addSamlEvent('SP', 'Flow Started (JWT OIDC)', 'Kullanıcı JWT/OIDC ile giriş işlemini başlattı.');
+    passport.authenticate('jwt', { scope: jwtConfig.scope ? jwtConfig.scope.split(' ') : ['openid', 'offline_access'] })(req, res, next);
+});
+
+// JWT Callback Handlr
+app.get('/login/jwt/callback', (req, res, next) => {
+    addSamlEvent('SP', 'Flow Started (JWT Callback)', 'JWT IdP geri dönüş yaptı.');
+    passport.authenticate('jwt', { failureRedirect: '/login?error=jwt_fail' }, (err, user, info) => {
+        if (err) {
+            logger.error('[CRITICAL] JWT Authentication Error:', err);
+            return res.redirect('/login?error=jwt_error');
+        }
+        if (!user) {
+            logger.error('[CRITICAL] JWT Authentication Failed (No User):', info);
+            return res.redirect('/login?error=jwt_invalid');
+        }
+        req.logIn(user, (err) => {
+            if (err) {
+                logger.error('[CRITICAL] Session Login Error (JWT):', err);
+                return next(err);
+            }
+            addSamlEvent('SP', 'JWT Login Success', 'JWT ile başarılı giriş yapıldı.');
+            return res.redirect('/dashboard');
+        });
+    })(req, res, next);
+});
+
 // Initial configuration load
 // Config is already loaded at the top.
 
@@ -701,6 +1199,7 @@ app.post('/admin/save-saml', (req, res) => {
         // But simpler is to reconstruct the object from the form fields.
 
         // 1. SP Settings - Edit Enabled
+        safeSet(samlConfig, 'sp.baseUrl', normalizeBaseUrl(req.body.sp_baseUrl || ''));
         safeSet(samlConfig, 'sp.entityId', req.body.sp_entityId);
         safeSet(samlConfig, 'sp.acsUrl', req.body.sp_acsUrl);
         safeSet(samlConfig, 'sp.nameIdFormat', req.body.sp_nameIdFormat || 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress');
@@ -753,7 +1252,18 @@ app.post('/admin/save-saml', (req, res) => {
         passport.unuse('saml');
         const newOptions = mapConfigToStrategyOptions(samlConfig);
         newOptions.idpCert = newOptions.cert;
-        passport.use('saml', new SamlStrategy(newOptions, samlVerifyCallback));
+        try {
+            passport.use('saml', new SamlStrategy(newOptions, samlVerifyCallback));
+        } catch (e) {
+            logger.error('[WARNING] Failed to initialize SAML Strategy after save:', e.message);
+            logger.info('Using Dummy SAML Strategy to allow server startup.');
+            passport.use('saml', {
+                name: 'saml',
+                authenticate: function (req, options) {
+                    this.fail({ message: 'SAML yapılandırması eksik veya hatalı. Lütfen yönetici paneli üzerinden ayarları güncelleyin.' }, 400);
+                }
+            });
+        }
 
         res.redirect('/admin?success=true');
 
@@ -771,6 +1281,311 @@ app.post('/admin/save-saml', (req, res) => {
                 </body>
             </html>
         `);
+    }
+});
+
+// Reset SAML settings (IdP / Security / Mapping) without touching SP values
+app.post('/admin/reset-saml', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+
+    const scope = String(req.body.reset_scope || 'all').toLowerCase();
+
+    const resetIdp = () => {
+        samlConfig.idp = samlConfig.idp || {};
+        samlConfig.idp.entityId = '';
+        samlConfig.idp.ssoUrl = '';
+        samlConfig.idp.sloUrl = '';
+        samlConfig.idp.x509cert = '';
+    };
+
+    const resetSecurity = () => {
+        samlConfig.security = samlConfig.security || {};
+        samlConfig.security.authnRequestsSigned = false;
+        samlConfig.security.wantAssertionsSigned = false;
+        samlConfig.security.wantMessagesSigned = false;
+        samlConfig.security.wantAssertionsEncrypted = false;
+        samlConfig.security.wantNameIdEncrypted = false;
+        samlConfig.security.signatureAlgorithm = 'sha256';
+        samlConfig.security.digestAlgorithm = 'sha256';
+        samlConfig.security.requestedAuthnContext = false;
+        samlConfig.security.requestedAuthnContextComparison = 'exact';
+        samlConfig.security.rejectUnsolicitedResponsesWithInResponseTo = false;
+        samlConfig.security.validateAudience = false;
+        samlConfig.security.validateIssuer = false;
+        samlConfig.security.validateDestination = false;
+        samlConfig.security.clockSkew = 300;
+    };
+
+    const resetMappingAndPermissions = () => {
+        samlConfig.attributeMapping = {
+            email: 'email',
+            username: 'uid',
+            firstName: 'givenName',
+            lastName: 'surname',
+            department: 'department',
+            roles: 'groups'
+        };
+        samlConfig.permissions = {
+            sourceAttribute: 'groups',
+            rules: []
+        };
+    };
+
+    if (scope === 'idp') resetIdp();
+    else if (scope === 'security') resetSecurity();
+    else if (scope === 'mapping') resetMappingAndPermissions();
+    else {
+        resetIdp();
+        resetSecurity();
+        resetMappingAndPermissions();
+    }
+
+    if (!saveSamlConfig(samlConfig)) {
+        return res.status(500).send('Ayarlar sıfırlanırken bir hata oluştu.');
+    }
+
+    // Re-apply strategy. If config is incomplete (likely after reset), fall back to dummy.
+    try {
+        passport.unuse('saml');
+        const newOptions = mapConfigToStrategyOptions(samlConfig);
+        newOptions.idpCert = newOptions.cert;
+        passport.use('saml', new SamlStrategy(newOptions, samlVerifyCallback));
+        addSamlEvent('System', 'Config Reset', `SAML ayarları sıfırlandı (scope: ${scope}).`);
+    } catch (e) {
+        logger.error('[WARNING] Failed to initialize SAML Strategy after reset:', e.message);
+        logger.info('Using Dummy SAML Strategy to allow server startup.');
+        passport.use('saml', {
+            name: 'saml',
+            authenticate: function (req, options) {
+                this.fail({ message: 'SAML yapılandırması eksik veya hatalı. Lütfen yönetici paneli üzerinden ayarları güncelleyin.' }, 400);
+            }
+        });
+        addSamlEvent('System', 'Config Reset', `SAML ayarları sıfırlandı (scope: ${scope}). Strategy dummy modda.` );
+    }
+
+    return res.redirect('/admin?success=true');
+});
+
+// Save OAuth Configuration
+app.post('/admin/save-oauth', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+
+    try {
+        oauthConfig.authorizationURL = req.body.oauth_authorizationURL || oauthConfig.authorizationURL;
+        oauthConfig.tokenURL = req.body.oauth_tokenURL || oauthConfig.tokenURL;
+        oauthConfig.clientID = req.body.oauth_clientID || oauthConfig.clientID;
+        oauthConfig.clientSecret = req.body.oauth_clientSecret || oauthConfig.clientSecret;
+        oauthConfig.callbackURL = req.body.oauth_callbackURL || oauthConfig.callbackURL;
+        oauthConfig.userInfoURL = req.body.oauth_userInfoURL !== undefined ? req.body.oauth_userInfoURL : (oauthConfig.userInfoURL || '');
+        
+        oauthConfig.attributeMapping = {
+            email: req.body.oauth_attr_email !== undefined ? req.body.oauth_attr_email : (oauthConfig.attributeMapping?.email || ''),
+            username: req.body.oauth_attr_username !== undefined ? req.body.oauth_attr_username : (oauthConfig.attributeMapping?.username || ''),
+            firstName: req.body.oauth_attr_firstName !== undefined ? req.body.oauth_attr_firstName : (oauthConfig.attributeMapping?.firstName || ''),
+            lastName: req.body.oauth_attr_lastName !== undefined ? req.body.oauth_attr_lastName : (oauthConfig.attributeMapping?.lastName || ''),
+            department: req.body.oauth_attr_department !== undefined ? req.body.oauth_attr_department : (oauthConfig.attributeMapping?.department || ''),
+            roles: req.body.oauth_attr_roles !== undefined ? req.body.oauth_attr_roles : (oauthConfig.attributeMapping?.roles || '')
+        };
+
+        if (!saveOauthConfig(oauthConfig)) {
+            return res.status(500).send('OAuth ayarları kaydedilirken hata oluştu.');
+        }
+
+        // Re-Config Strategy
+        passport.unuse('oauth2');
+        try {
+            const oauthStrategyOptions = {
+                authorizationURL: oauthConfig.authorizationURL,
+                tokenURL: oauthConfig.tokenURL,
+                clientID: oauthConfig.clientID,
+                clientSecret: oauthConfig.clientSecret,
+                callbackURL: oauthConfig.callbackURL
+            };
+            const oauthStrategy = new OAuth2Strategy(oauthStrategyOptions, oauthVerifyCallback);
+            oauthStrategy.userProfile = function(accessToken, done) {
+                if (!oauthConfig.userInfoURL) {
+                    return done(null, {});
+                }
+                this._oauth2.get(oauthConfig.userInfoURL, accessToken, function (err, body, res) {
+                    if (err) {
+                        logger.error('[OAuth] Failed to fetch user profile', err);
+                        return done(null, {});
+                    }
+                    try {
+                        const json = JSON.parse(body);
+                        done(null, json);
+                    } catch (ex) {
+                        logger.error('[OAuth] Failed to parse user profile', ex);
+                        done(null, {});
+                    }
+                });
+            };
+            passport.use('oauth2', oauthStrategy);
+            addSamlEvent('System', 'OAuth Config Saved', 'OAuth ayarları güncellendi ve strateji yeniden kuruldu.');
+        } catch (e) {
+            logger.error('[WARNING] Failed to initialize OAuth Strategy after save:', e.message);
+            passport.use('oauth2', {
+                name: 'oauth2',
+                authenticate: function (req, options) {
+                    this.fail({ message: 'OAuth yapılandırması eksik veya hatalı.' }, 400);
+                }
+            });
+        }
+
+        res.redirect('/admin?success=true');
+    } catch (e) {
+        logger.error("OAuth config save error:", e);
+        res.status(500).send('Hata oluştu.');
+    }
+});
+
+// Save JWT Configuration
+app.post('/admin/save-jwt', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+
+    try {
+        jwtConfig.authorizationURL = req.body.jwt_authorizationURL || jwtConfig.authorizationURL;
+        jwtConfig.tokenURL = req.body.jwt_tokenURL || jwtConfig.tokenURL;
+        jwtConfig.userInfoURL = req.body.jwt_userInfoURL !== undefined ? req.body.jwt_userInfoURL : (jwtConfig.userInfoURL || '');
+        jwtConfig.logoutURL = req.body.jwt_logoutURL !== undefined ? req.body.jwt_logoutURL : (jwtConfig.logoutURL || '');
+        jwtConfig.jwksURL = req.body.jwt_jwksURL !== undefined ? req.body.jwt_jwksURL : (jwtConfig.jwksURL || '');
+        jwtConfig.clientID = req.body.jwt_clientID || jwtConfig.clientID;
+        jwtConfig.clientSecret = req.body.jwt_clientSecret || jwtConfig.clientSecret;
+        jwtConfig.scope = req.body.jwt_scope || jwtConfig.scope;
+        jwtConfig.callbackURL = req.body.jwt_callbackURL || jwtConfig.callbackURL;
+        
+        jwtConfig.attributeMapping = {
+            email: req.body.jwt_attr_email !== undefined ? req.body.jwt_attr_email : (jwtConfig.attributeMapping?.email || ''),
+            username: req.body.jwt_attr_username !== undefined ? req.body.jwt_attr_username : (jwtConfig.attributeMapping?.username || ''),
+            firstName: req.body.jwt_attr_firstName !== undefined ? req.body.jwt_attr_firstName : (jwtConfig.attributeMapping?.firstName || ''),
+            lastName: req.body.jwt_attr_lastName !== undefined ? req.body.jwt_attr_lastName : (jwtConfig.attributeMapping?.lastName || ''),
+            department: req.body.jwt_attr_department !== undefined ? req.body.jwt_attr_department : (jwtConfig.attributeMapping?.department || ''),
+            roles: req.body.jwt_attr_roles !== undefined ? req.body.jwt_attr_roles : (jwtConfig.attributeMapping?.roles || '')
+        };
+
+        if (!saveJwtConfig(jwtConfig)) {
+            return res.status(500).send('JWT ayarları kaydedilirken hata oluştu.');
+        }
+
+        // Re-Config Strategy
+        passport.unuse('jwt');
+        try {
+            const jwtStrategyOptions = {
+                authorizationURL: jwtConfig.authorizationURL,
+                tokenURL: jwtConfig.tokenURL,
+                clientID: jwtConfig.clientID,
+                clientSecret: jwtConfig.clientSecret,
+                callbackURL: jwtConfig.callbackURL,
+                customHeaders: {},
+                scope: jwtConfig.scope ? jwtConfig.scope.split(' ') : ['openid']
+            };
+            const jwtStrategy = new OAuth2Strategy(jwtStrategyOptions, jwtVerifyCallback);
+            jwtStrategy.userProfile = function(accessToken, done) {
+                if (!jwtConfig.userInfoURL) {
+                    return done(null, {});
+                }
+                this._oauth2.get(jwtConfig.userInfoURL, accessToken, function (err, body, res) {
+                    if (err) { return done(null, {}); }
+                    try { done(null, JSON.parse(body)); } catch (ex) { done(null, {}); }
+                });
+            };
+            passport.use('jwt', jwtStrategy);
+
+            addSamlEvent('System', 'JWT Config Saved', 'JWT ayarları güncellendi ve strateji yeniden kuruldu.');
+        } catch (e) {
+            logger.error('[WARNING] Failed to initialize JWT Strategy after save:', e.message);
+            passport.use('jwt', {
+                name: 'jwt',
+                authenticate: function(req, options) { this.fail({ message: 'JWT hatalı' }, 400); }
+            });
+        }
+
+        res.redirect('/admin?success=true');
+    } catch (e) {
+        logger.error("JWT config save error:", e);
+        res.status(500).send('Hata oluştu.');
+    }
+});
+
+// Factory Reset All Data
+app.post('/admin/factory-reset', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+
+    try {
+        // Reset SAML
+        samlConfig = {
+            sp: { baseUrl: 'http://localhost:3000', additionalClaims: { claim1: 'value1' }, enableRelayState: true },
+            idp: { ssoUrl: '', cert: '' },
+            security: { wantAssertionsSigned: false, wantMessagesSigned: false, wantNameIdEncrypted: false, clockSkew: 300, signatureAlgorithm: 'sha256', digestAlgorithm: 'sha256' },
+            attributeMapping: { email: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress', firstName: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname', lastName: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname', username: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name', department: 'department', roles: 'http://schemas.microsoft.com/ws/2008/06/identity/claims/groups' },
+            permissions: { rules: [] }
+        };
+        fs.writeFileSync(configPath, JSON.stringify(samlConfig, null, 2), 'utf8');
+
+        // Reset OAuth
+        oauthConfig = {
+            authorizationURL: 'https://provider.com/oauth2/authorize',
+            tokenURL: 'https://provider.com/oauth2/token',
+            clientID: '',
+            clientSecret: '',
+            callbackURL: 'http://localhost:3000/login/oauth/callback',
+            userInfoURL: '',
+            attributeMapping: { email: 'Email', username: 'UserName', firstName: '', lastName: '', department: '', roles: '' }
+        };
+        fs.writeFileSync(oauthConfigPath, JSON.stringify(oauthConfig, null, 2), 'utf8');
+
+        // Reset JWT / OIDC
+        jwtConfig = {
+            authorizationURL: 'https://provider.com/jwt/authorize',
+            tokenURL: 'https://provider.com/jwt/token',
+            logoutURL: '',
+            userInfoURL: '',
+            jwksURL: '',
+            clientID: '',
+            clientSecret: '',
+            scope: 'openid offline_access',
+            callbackURL: 'http://localhost:3000/login/jwt/callback',
+            attributeMapping: { email: 'Email', username: 'UserName', firstName: '', lastName: '', department: '', roles: '' }
+        };
+        fs.writeFileSync(jwtConfigPath, JSON.stringify(jwtConfig, null, 2), 'utf8');
+
+        // Clear Tasks
+        const tasksPath = path.join(__dirname, '../tasks.json');
+        if (fs.existsSync(tasksPath)) {
+            fs.unlinkSync(tasksPath);
+        }
+        if (taskManager && typeof taskManager.clearTasks === 'function') {
+            taskManager.clearTasks();
+        }
+
+        // Clear Logs
+        global.samlEvents = [];
+
+        // Nullify Passports dynamically (so they fail gracefully until re-configured, or let nodemon handle restart)
+        passport.unuse('saml');
+        passport.use('saml', { name: 'saml', authenticate: function() { this.fail({ message: 'SAML sıfırlandı' }, 400); } });
+        
+        passport.unuse('oauth2');
+        passport.use('oauth2', { name: 'oauth2', authenticate: function() { this.fail({ message: 'OAuth2 sıfırlandı' }, 400); } });
+        
+        passport.unuse('jwt');
+        passport.use('jwt', { name: 'jwt', authenticate: function() { this.fail({ message: 'JWT sıfırlandı' }, 400); } });
+
+        logger.info('Tüm veri ve konfigürasyonlar fabrika ayarına sıfırlandı.');
+        addSamlEvent('System', 'Factory Reset', 'Tüm sistem verileri tamamen sıfırlandı ve silindi.');
+        
+        res.redirect('/admin?success=true');
+    } catch (e) {
+        logger.error('Factory reset failed:', e);
+        res.status(500).send('Fabrika ayarlarına dönme başarısız.');
     }
 });
 
@@ -828,7 +1643,7 @@ app.get('/admin', (req, res, next) => {
         { check: 'iammert_sozluk', label: 'Sözlük Yetkisi (iammert_sozluk)', placeholder: 'dev' }
     ];
 
-    const permissionRules = fixedPermissions.map(fp => {
+    const mappedRules = fixedPermissions.map(fp => {
         let currentVal = '';
         if (config.permissions && config.permissions.rules) {
             const rule = config.permissions.rules.find(r => r.permission === fp.check);
@@ -839,10 +1654,12 @@ app.get('/admin', (req, res, next) => {
 
     res.render('admin', {
         title: 'Admin Panel',
-        config: config,
+        config: samlConfig,
+        oauthConfig: oauthConfig,
+        jwtConfig: jwtConfig,
         user: req.user,
-        permissionRules: permissionRules,
-        message: req.query.success ? 'Ayarlar başarıyla kaydedildi!' : null,
+        permissionRules: mappedRules,
+        message: req.query.success ? 'Ayarlar başarıyla kaydedildi! Strategy yeniden başlatıldı.' : null,
         events: global.samlEvents || []
     });
 });

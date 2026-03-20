@@ -37,10 +37,11 @@ Konteyneri durdurmak ve kaldırmak için:
 docker-compose down
 ```
 
-### Konfigürasyon Dosyası
-`saml-config.json` dosyası, Docker konteyneri ile **eşleştirilmiştir (volume mapping)**. Yani:
--   Admin panelinden (`/admin`) yaptığınız değişiklikler, yerel bilgisayarınızdaki `saml-config.json` dosyasına **anında yazılır**.
--   Konteyneri silip tekrar başlatsanız bile ayarlarınız **kaybolmaz**.
+### Konfigürasyon Kalıcılığı (Volume Mapping)
+IdP ve Kimlik sağlayıcı ayarları (`saml-config.json`, `oauth-config.json`, `jwt-config.json`) Docker konteyneri ile bilgisayarınız/sunucunuz arasında **eşleştirilmiştir (volume mapping)**. Yani:
+-   Admin panelinden (`/admin`) SAML, OAuth veya JWT üzerinde yaptığınız değişiklikler doğrudan ana makinenizdeki bu `.json` dosyalarına **anında yazılır**.
+-   Eğitim/Sistem sekmesinden tüm "Factory Reset" işlemleriniz güvenle bu configlere işlenir.
+-   Konteyneri (container'ı) tamamen silip (remove) tekrar başlatsanız bile Identity ayarlarınız, kayıtlı Session, Event loglarınız ve Görev (Eğitim) ilerlemeleriniz **asla kaybolmaz**.
 
 ## Sorun Giderme
 
