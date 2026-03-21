@@ -1,6 +1,6 @@
-# 🚀 IAMERT - DevSSO Hub (SAML, OAuth 2.0 & OIDC)
+# 🚀 Easy SAML - Node.js SAML Service Provider
 
-IAMERT, Node.js ve Passport.js kullanılarak geliştirilmiş, son derece kapsamlı bir Kimlik Erişim Yönetimi (IAM) test merkezidir. Önceden sadece SAML 2.0 Service Provider (SP) olarak hizmet veren bu proje, artık **OAuth 2.0** ve **OIDC (JWT)** protokollerini de tam destekleyerek uçtan uca bir entegrasyon laboratuvarına dönüşmüştür.
+Easy SAML, Node.js ve Passport.js kullanılarak geliştirilmiş, basit ve eğitici bir SAML 2.0 Service Provider (SP) uygulamasıdır. Bu proje, SAML entegrasyonlarını test etmek, öğrenmek veya hızlıca bir SP ayağa kaldırmak için tasarlanmıştır.
 
 🔗 **Canlı Demo:** [https://easy-samli.onrender.com/](https://easy-samli.onrender.com/)
 
@@ -8,11 +8,11 @@ IAMERT, Node.js ve Passport.js kullanılarak geliştirilmiş, son derece kapsaml
 
 ## ✨ Özellikler
 
-*   **Çoklu Protokol:** Tek ekranda SAML 2.0, OAuth 2.0 ve OpenID Connect (OIDC/JWT) ile SSO testleri yapabilme.
-*   **Dinamik Yapılandırma:** Uygulamayı yeniden başlatmaya gerek kalmadan tüm IdP, Client ID/Secret, Entity ID ayarlarını yönetici panelinden değiştirme.
-*   **Factory Reset / Kısmi Sıfırlama:** Eğitim bitiminde tek bir butona basarak sadece görevleri, SAML kısmını veya komple tüm projeyi ilk indirildiği boş haline döndürebilme.
-*   **Sade ve Modern Clean UI:** Vercel ve GitHub stiline benzeyen beyaz/gri ağırlıklı, minimalist, üretkenliği artıran şık ekranlar.
-*   **Docker Kalıcılığı:** Sunucu/Container baştan başlasa dahi tüm Identity ayarlarınız hacim bağlaması (volume bind) sayesinde korunur.
+*   **SAML 2.0 Desteği:** `@node-saml/passport-saml` kütüphanesi ile tam uyumlu.
+*   **Dinamik Yapılandırma:** Uygulamayı yeniden başlatmadan yönetici panelinden SAML ayarlarını (IdP URL, Sertifikalar vb.) değiştirebilme.
+*   **Kolay Kurulum:** Docker Compose ile tek komutla çalıştırılabilir.
+*   **Debug Modu:** SAML Redirect döngülerini ve hataları algılayan gelişmiş loglama ve hata sayfaları.
+*   **Modern Arayüz:** EJS ve CSS ile temiz, anlaşılır bir kullanıcı arayüzü.
 
 
 ---
