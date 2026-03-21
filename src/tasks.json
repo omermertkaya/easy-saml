@@ -19,5 +19,19 @@
     "description": "SAML ile giriş yapan kullanıcının, IdP'den gelen grup bilgisine göre (admin veya dev) ilgili sayfalara (Admin Paneli veya Sözlük) erişebildiğini doğrulayın.",
     "completed": false,
     "completedAt": null
+  },
+  {
+    "id": "oauth-setup",
+    "title": "Görev 4: OAuth 2.0 Doğrulaması",
+    "description": "OAuth 2.0 entegrasyon ayarlarınızı tamamlayarak başarılı bir SSO kimlik doğrulama işlemi gerçekleştirin.",
+    "completed": false,
+    "completedAt": null
+  },
+  {
+    "id": "jwt-setup",
+    "title": "Görev 5: JWT Doğrulaması",
+    "description": "JWT entegrasyon ayarlarınızı tamamlayarak başarılı bir SSO kimlik doğrulama işlemi gerçekleştirin.",
+    "completed": false,
+    "completedAt": null
   }
 ]

@@ -559,6 +559,202 @@ try {
     });
 }
 
+
+// 3. OAuth 2.0 Strategy Configuration
+function getPropByString(obj, propString) {
+    if (!propString || !obj) return undefined;
+    const parts = propString.split('.');
+    let curr = obj;
+    for (let part of parts) {
+        if (curr === undefined || curr === null) return undefined;
+        curr = curr[part];
+    }
+    return curr === undefined || curr === null ? '' : curr;
+}
+
+function oauthVerifyCallback(accessToken, refreshToken, profile, done) {
+    try {
+        addSamlEvent('SP', 'OAuth Identity Verified', 'OAuth IdP kimlik doğrulamasını başarıyla tamamladı.', { accessToken: accessToken ? '*****' : null });
+        
+        // Profil alanlarını JWT / Passport formatlarına göre esnek map edelim
+        const rawEmail = (profile && profile.email) || (profile && profile.emails && profile.emails[0] ? profile.emails[0].value : 'oauth@example.com');
+        const rawUsername = profile && (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) ? (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) : 'oauth_user';
+        const rawId = profile && (profile.sub || profile.id) ? (profile.sub || profile.id) : 'oauth-user';
+        const rawFirstName = profile && (profile.given_name || profile.givenName || (profile.name && profile.name.givenName)) ? (profile.given_name || profile.givenName || profile.name.givenName) : '';
+        const rawLastName = profile && (profile.family_name || profile.familyName || (profile.name && profile.name.familyName)) ? (profile.family_name || profile.familyName || profile.name.familyName) : '';
+
+        const mapping = oauthConfig.attributeMapping || {};
+        const mappedEmail = mapping.email ? getPropByString(profile, mapping.email) : rawEmail;
+        const mappedUsername = mapping.username ? getPropByString(profile, mapping.username) : rawUsername;
+        const mappedFirstName = mapping.firstName ? getPropByString(profile, mapping.firstName) : rawFirstName;
+        const mappedLastName = mapping.lastName ? getPropByString(profile, mapping.lastName) : rawLastName;
+        const mappedDepartment = mapping.department ? getPropByString(profile, mapping.department) : (profile && profile.department ? profile.department : '');
+        let mappedRoles = mapping.roles ? getPropByString(profile, mapping.roles) : (profile && profile.groups ? profile.groups : (profile && profile.roles ? profile.roles : []));
+
+        if (!Array.isArray(mappedRoles)) {
+             mappedRoles = typeof mappedRoles === 'string' ? mappedRoles.split(',').map(s=>s.trim()) : [];
+        }
+
+        const user = {
+            id: String(rawId),
+            username: String(mappedUsername || rawUsername || 'oauth_user'),
+            email: String(mappedEmail || rawEmail || 'oauth@example.com'),
+            source: 'oauth',
+            permissions: [],
+            oauthProfile: profile,
+            mappedProfile: {
+                email: String(mappedEmail || rawEmail || ''),
+                firstName: String(mappedFirstName || ''),
+                lastName: String(mappedLastName || ''),
+                username: String(mappedUsername || rawUsername || ''),
+                department: String(mappedDepartment || ''),
+                roles: mappedRoles
+            }
+        };
+        
+        // Mark OAuth setup task as complete
+        taskManager.completeTask('oauth-setup');
+        
+        return done(null, user);
+    } catch (error) {
+        logger.error('[CRITICAL] Error in oauthVerifyCallback:', error);
+        return done(error);
+    }
+}
+
+try {
+    const oauthStrategyOptions = {
+        authorizationURL: oauthConfig.authorizationURL,
+        tokenURL: oauthConfig.tokenURL,
+        clientID: oauthConfig.clientID,
+        clientSecret: oauthConfig.clientSecret,
+        callbackURL: oauthConfig.callbackURL
+    };
+    const oauthStrategy = new OAuth2Strategy(oauthStrategyOptions, oauthVerifyCallback);
+    oauthStrategy.userProfile = function(accessToken, done) {
+        if (!oauthConfig.userInfoURL) {
+            return done(null, {});
+        }
+        this._oauth2.get(oauthConfig.userInfoURL, accessToken, function (err, body, res) {
+            if (err) {
+                logger.error('[OAuth] Failed to fetch user profile', err);
+                return done(null, {}); // fallback to empty profile
+            }
+            try {
+                const json = JSON.parse(body);
+                done(null, json);
+            } catch (ex) {
+                logger.error('[OAuth] Failed to parse user profile', ex);
+                done(null, {});
+            }
+        });
+    };
+    passport.use('oauth2', oauthStrategy);
+} catch (e) {
+    logger.error('[WARNING] Failed to initialize OAuth Strategy (likely missing config):', e.message);
+    passport.use('oauth2', {
+        name: 'oauth2',
+        authenticate: function (req, options) {
+            this.fail({ message: 'OAuth yapılandırması eksik veya hatalı.' }, 400);
+        }
+    });
+}
+
+// 4. JWT Strategy Configuration
+function jwtVerifyCallback(accessToken, refreshToken, profile, done) {
+    try {
+        addSamlEvent('SP', 'JWT Verified', 'JWT IdP kimlik doğrulamasını başarıyla tamamladı.', { accessToken: accessToken ? '*****' : null });
+        
+        const rawEmail = (profile && profile.email) || (profile && profile.emails && profile.emails[0] ? profile.emails[0].value : 'jwt@example.com');
+        const rawUsername = profile && (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) ? (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) : 'jwt_user';
+        const rawId = profile && (profile.sub || profile.id) ? (profile.sub || profile.id) : 'jwt-user';
+        const rawFirstName = profile && (profile.given_name || profile.givenName || (profile.name && profile.name.givenName)) ? (profile.given_name || profile.givenName || profile.name.givenName) : '';
+        const rawLastName = profile && (profile.family_name || profile.familyName || (profile.name && profile.name.familyName)) ? (profile.family_name || profile.familyName || profile.name.familyName) : '';
+
+        const mapping = jwtConfig.attributeMapping || {};
+        const mappedEmail = mapping.email ? getPropByString(profile, mapping.email) : rawEmail;
+        const mappedUsername = mapping.username ? getPropByString(profile, mapping.username) : rawUsername;
+        const mappedFirstName = mapping.firstName ? getPropByString(profile, mapping.firstName) : rawFirstName;
+        const mappedLastName = mapping.lastName ? getPropByString(profile, mapping.lastName) : rawLastName;
+        const mappedDepartment = mapping.department ? getPropByString(profile, mapping.department) : (profile && profile.department ? profile.department : '');
+        let mappedRoles = mapping.roles ? getPropByString(profile, mapping.roles) : (profile.roles || profile.groups || []);
+
+        if (!Array.isArray(mappedRoles)) {
+             mappedRoles = typeof mappedRoles === 'string' ? mappedRoles.split(',').map(s=>s.trim()) : [];
+        }
+
+        const user = {
+            id: String(rawId),
+            username: String(mappedUsername || rawUsername || 'jwt_user'),
+            email: String(mappedEmail || rawEmail || 'jwt@example.com'),
+            source: 'jwt',
+            permissions: [],
+            oauthProfile: profile, // reuse this display placeholder for JWT analysis dashboard
+            mappedProfile: {
+                email: String(mappedEmail || rawEmail || ''),
+                firstName: String(mappedFirstName || ''),
+                lastName: String(mappedLastName || ''),
+                username: String(mappedUsername || rawUsername || ''),
+                department: String(mappedDepartment || ''),
+                roles: mappedRoles
+            }
+        };
+        
+        // Mark JWT setup task as complete
+        taskManager.completeTask('jwt-setup');
+        
+        return done(null, user);
+    } catch (error) {
+        logger.error('[CRITICAL] Error in jwtVerifyCallback:', error);
+        return done(error);
+    }
+}
+
+try {
+    const jwtStrategyOptions = {
+        authorizationURL: jwtConfig.authorizationURL,
+        tokenURL: jwtConfig.tokenURL,
+        clientID: jwtConfig.clientID,
+        clientSecret: jwtConfig.clientSecret,
+        callbackURL: jwtConfig.callbackURL,
+        customHeaders: {},
+        scope: jwtConfig.scope ? jwtConfig.scope.split(' ') : ['openid']
+    };
+    
+    const jwtStrategy = new OAuth2Strategy(jwtStrategyOptions, jwtVerifyCallback);
+    
+    // Override userProfile to fetch UserInfo from jwtConfig.userInfoURL
+    jwtStrategy.userProfile = function(accessToken, done) {
+        if (!jwtConfig.userInfoURL) {
+            return done(null, {});
+        }
+        this._oauth2.get(jwtConfig.userInfoURL, accessToken, function (err, body, res) {
+            if (err) {
+                logger.error('[JWT] Failed to fetch user profile', err);
+                return done(null, {});
+            }
+            try {
+                const json = JSON.parse(body);
+                done(null, json);
+            } catch (ex) {
+                logger.error('[JWT] Failed to parse user profile', ex);
+                done(null, {});
+            }
+        });
+    };
+
+    passport.use('jwt', jwtStrategy);
+} catch (e) {
+    logger.error('[WARNING] Failed to initialize JWT Strategy:', e.message);
+    passport.use('jwt', {
+        name: 'jwt',
+        authenticate: function (req, options) {
+            this.fail({ message: 'JWT yapılandırması eksik.' }, 400);
+        }
+    });
+}
+
+
 // --- Authentication Logic End ---
 
 // Routes
