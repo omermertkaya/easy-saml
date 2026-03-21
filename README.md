@@ -1,4 +1,4 @@
-# 🚀 Easy SAML - Node.js SAML Service Provider
+  # 🚀 Easy SAML - Node.js SAML Service Provider
 
 Easy SAML, Node.js ve Passport.js kullanılarak geliştirilmiş, basit ve eğitici bir SAML 2.0 Service Provider (SP) uygulamasıdır. Bu proje, SAML entegrasyonlarını test etmek, öğrenmek veya hızlıca bir SP ayağa kaldırmak için tasarlanmıştır.
 
@@ -131,4 +131,4 @@ Hataları bildirmek veya özellik eklemek için lütfen bir "Issue" açın veya 
 
 ## 📝 Lisans
 
-Bu proje ISC lisansı ile lisanslanmıştır.
+Bu proje ISC lisansı ile lisanslanmıştır. Ücretsiz şekilde kullanabilirsiniz.
