@@ -166,8 +166,11 @@
             <p class="text-muted mb-3 small">Lokal veya Kurumsal Kimlik (SSO) ile devam edin.</p>
 
             <% if (locals.message) { %>
-                <div class="alert alert-danger bg-danger text-white border-0 shadow-sm rounded-3 py-2 px-3 small d-flex align-items-center mb-3" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i> <div><%= message %></div>
+                <% const msgType = locals.messageType || 'danger'; %>
+                <% const bgClass = msgType === 'danger' ? 'bg-danger text-white' : 'bg-warning text-dark'; %>
+                <% const iconClass = msgType === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-exclamation-circle-fill'; %>
+                <div class="alert alert-<%= msgType %> <%= bgClass %> border-0 shadow-sm rounded-3 py-2 px-3 small d-flex align-items-center mb-3" role="alert">
+                    <i class="bi <%= iconClass %> fs-5 me-2"></i> <div><%= message %></div>
                 </div>
             <% } %>
 
@@ -214,7 +217,7 @@
             </div>
 
             <div class="text-center mt-3 pt-2">
-                <a href="/" class="text-muted text-decoration-none fw-semibold"><i class="bi bi-arrow-left me-1"></i>Ana Sayfa</a>
+                <!-- Ana Sayfa link kaldırıldı -->
             </div>
         </div>
     </div>

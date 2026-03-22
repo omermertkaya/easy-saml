@@ -797,10 +797,32 @@ app.get('/login', (req, res) => {
     }
     // For educational purposes, sending default credentials to the view
     const defaultUser = users[0];
+
+    let alertMessage = null;
+    let alertType = 'danger';
+
+    if (req.session && req.session.messages && req.session.messages.length > 0) {
+        alertMessage = req.session.messages.join('<br>');
+        req.session.messages = [];
+    }
+
+    if (req.query.error === 'saml_missing') {
+        alertMessage = 'SAML ayarları yapılandırılmamış. Lütfen yönetici paneli üzerinden gerekli IdP ve SP ayarlarını tamamlayın.';
+        alertType = 'warning';
+    } else if (req.query.error === 'oauth_missing') {
+        alertMessage = 'OAuth 2.0 ayarları yapılandırılmamış. Lütfen yönetici paneli üzerinden ayarlamaları tamamlayın.';
+        alertType = 'warning';
+    } else if (req.query.error === 'jwt_missing') {
+        alertMessage = 'JWT ayarları yapılandırılmamış. Lütfen yönetici paneli üzerinden ayarlamaları tamamlayın.';
+        alertType = 'warning';
+    }
+
     res.render('login', {
         title: 'Giriş Yap',
         defaultUser: defaultUser,
-        jwtConfig: jwtConfig
+        jwtConfig: jwtConfig,
+        message: alertMessage,
+        messageType: alertType
     });
 });
 
@@ -856,6 +878,12 @@ app.post('/login/sso', (req, res) => {
 
 // GET Handler: Initiate Login
 app.get('/login/sso', (req, res, next) => {
+    // Configuration Check
+    const isSamlConfigured = samlConfig && samlConfig.idp && samlConfig.idp.ssoUrl && !samlConfig.idp.ssoUrl.includes('xxxxxxxxx');
+    if (!isSamlConfigured) {
+        return res.redirect('/login?error=saml_missing');
+    }
+
     // LOOP DETECTION: Check if IdP is redirecting back here with a response
     // Safely check properties to avoid 'undefined' errors
     const hasSAMLResponse = (req.query && req.query.SAMLResponse) || (req.body && req.body.SAMLResponse);
@@ -1118,6 +1146,40 @@ app.post('/login/sso/callback',
         })(req, res, next);
     }
 );
+
+// --- OAuth 2.0 Login / Callback ---
+app.get('/login/oauth', (req, res, next) => {
+    if (!oauthConfig || !oauthConfig.clientID || oauthConfig.clientID.trim() === 'client_id' || oauthConfig.clientID.trim() === '') {
+        return res.redirect('/login?error=oauth_missing');
+    }
+    next();
+}, passport.authenticate('oauth2', {
+    failureRedirect: '/login',
+    failureMessage: true
+}));
+
+app.get('/login/oauth/callback', passport.authenticate('oauth2', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login',
+    failureMessage: true
+}));
+
+// --- JWT Login / Callback ---
+app.get('/login/jwt', (req, res, next) => {
+    if (!jwtConfig || !jwtConfig.clientID || jwtConfig.clientID.trim() === '') {
+        return res.redirect('/login?error=jwt_missing');
+    }
+    next();
+}, passport.authenticate('jwt', {
+    failureRedirect: '/login',
+    failureMessage: true
+}));
+
+app.get('/login/jwt/callback', passport.authenticate('jwt', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login',
+    failureMessage: true
+}));
 
 // Initial configuration load
 // Config is already loaded at the top.

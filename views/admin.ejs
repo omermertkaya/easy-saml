@@ -102,7 +102,7 @@
                                                     ayarlarınız şu şekilde olmalıdır:</p>
                                                 <ul class="small mb-0 text-dark">
                                                     <li><strong>ACS URL (Callback):</strong> <code
-                                                            class="user-select-all fw-bold" id="hint_acsUrl"><%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %></code>
+                                                            class="user-select-all fw-bold" id="hint_acsUrl"><%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/login/sso/callback') : 'http://localhost:3000/login/sso/callback' %></code>
                                                     </li>
                                                     <li><strong>SP Metadata URL:</strong> <code
                                                             class="user-select-all fw-bold" id="hint_metadataUrl"><%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/saml/metadata') : 'http://localhost:3000/saml/metadata' %></code>
@@ -122,7 +122,7 @@
                                                         id="sp_baseUrl" name="sp_baseUrl"
                                                         value="<%= (config.sp && config.sp.baseUrl) ? config.sp.baseUrl : 'http://localhost:3000' %>"
                                                         placeholder="Örn: https://sso.mycompany.com"
-                                                        oninput="const base = this.value.replace(/\/$/, ''); document.getElementById('sp_entityId').value = base + '/saml/metadata'; document.getElementById('sp_acsUrl').value = base + '/login/sso/callback'; document.getElementById('hint_acsUrl').innerText = base + '/login/sso/callback'; document.getElementById('hint_metadataUrl').innerText = base + '/saml/metadata'; document.getElementById('hint_entityId').innerText = base + '/saml/metadata';">
+                                                        oninput="const base = this.value.replace(/\/$/, ''); document.getElementById('sp_entityId').value = base + '/saml/metadata'; document.getElementById('sp_acsUrl').value = base + '/login/sso/callback'; document.getElementById('hint_acsUrl').innerText = base + '/login/sso/callback'; document.getElementById('hint_metadataUrl').innerText = base + '/saml/metadata'; document.getElementById('hint_entityId').innerText = base + '/saml/metadata'; const o = document.getElementById('oauth_callbackURL'); if(o) o.value = base + '/login/oauth/callback'; const j = document.getElementById('jwt_callbackURL'); if(j) j.value = base + '/login/jwt/callback';">
                                                     <button class="btn btn-outline-secondary" type="button"
                                                         onclick="navigator.clipboard.writeText(document.getElementById('sp_baseUrl').value)"
                                                         title="Kopyala"><i class="bi bi-clipboard"></i></button>
@@ -134,7 +134,7 @@
                                                 <div class="input-group input-group-sm">
                                                     <input type="text" class="form-control font-monospace border-primary bg-light text-primary"
                                                         id="sp_acsUrl" name="sp_acsUrl" style="cursor: not-allowed;"
-                                                        value="<%= config.sp ? config.sp.acsUrl : 'http://localhost:3000/login/sso/callback' %>"
+                                                        value="<%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/login/sso/callback') : 'http://localhost:3000/login/sso/callback' %>"
                                                         readonly>
                                                     <button class="btn btn-primary shadow-none" type="button"
                                                         onclick="navigator.clipboard.writeText(document.getElementById('sp_acsUrl').value)"
@@ -143,17 +143,17 @@
                                                 <div class="form-text text-muted small">IdP'nin kullanıcıyı geri döndüreceği hedeftir. Yazılım mimarisi gereği yol daima <code class="fw-bold">/login/sso/callback</code> olarak yapılandırılmıştır.</div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label for="sp_entityId" class="form-label fw-bold small text-uppercase text-secondary">Entity ID / Issuer</label>
+                                                <label for="sp_entityId" class="form-label fw-bold small text-uppercase text-primary">Entity ID / Issuer (Otomatik)</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="text" class="form-control font-monospace"
+                                                    <input type="text" class="form-control font-monospace border-primary bg-light text-primary" style="cursor: not-allowed;"
                                                         id="sp_entityId" name="sp_entityId"
                                                         value="<%= (config.sp && config.sp.entityId && config.sp.entityId.trim() && config.sp.entityId.trim() !== 'passport-saml') ? config.sp.entityId : ((config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/saml/metadata') : 'http://localhost:3000/saml/metadata') %>"
-                                                        required>
-                                                    <button class="btn btn-outline-secondary" type="button"
+                                                        readonly>
+                                                    <button class="btn btn-primary shadow-none" type="button"
                                                         onclick="navigator.clipboard.writeText(document.getElementById('sp_entityId').value)"
                                                         title="Kopyala"><i class="bi bi-clipboard"></i></button>
                                                 </div>
-                                                <div class="form-text text-muted small">Uygulamanızın (Servis Sağlayıcının) kimliğidir. Genellikle Metadata URL'si ile aynıdır.</div>
+                                                <div class="form-text text-muted small">Uygulamanızın (Servis Sağlayıcının) kimliğidir. Sistem Domain Adresine göre otomatik oluşturulur.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -433,8 +433,14 @@
                             <div class="form-text" style="font-size: 0.75rem;">IdP'den Access Token ile ek profil detayı çekmek için.</div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="oauth_callbackURL" class="form-label fw-bold small">Callback URL</label>
-                            <input type="url" class="form-control font-monospace" id="oauth_callbackURL" name="oauth_callbackURL" value="<%= locals.oauthConfig ? oauthConfig.callbackURL : 'http://localhost:3000/login/oauth/callback' %>" required>
+                            <label for="oauth_callbackURL" class="form-label fw-bold small text-uppercase text-primary">Callback URL (Otomatik)</label>
+                            <div class="input-group input-group-sm">
+                                <input type="url" class="form-control font-monospace border-primary bg-light text-primary" id="oauth_callbackURL" name="oauth_callbackURL" value="<%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/login/oauth/callback') : 'http://localhost:3000/login/oauth/callback' %>" style="cursor: not-allowed;" readonly>
+                                <button class="btn btn-primary shadow-none" type="button"
+                                    onclick="navigator.clipboard.writeText(document.getElementById('oauth_callbackURL').value)"
+                                    title="Kopyala"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                            <div class="form-text text-muted small">Uygulamanızın SAML panelindeki Sistem Domain Adresine göre oluşturulur. IdP üzerinde Callback olarak yetkilendirilmelidir.</div>
                         </div>
                     </div>
 
@@ -518,8 +524,14 @@
                             <input type="text" class="form-control font-monospace" id="jwt_scope" name="jwt_scope" value="<%= locals.jwtConfig ? jwtConfig.scope : 'openid offline_access' %>" required>
                         </div>
                         <div class="col-12 mb-3">
-                            <label for="jwt_callbackURL" class="form-label fw-bold small text-primary">Callback URL (SP)</label>
-                            <input type="url" class="form-control font-monospace bg-light" id="jwt_callbackURL" name="jwt_callbackURL" value="<%= locals.jwtConfig ? jwtConfig.callbackURL : 'http://localhost:3000/login/jwt/callback' %>" required>
+                            <label for="jwt_callbackURL" class="form-label fw-bold small text-uppercase text-primary">Callback URL / SP (Otomatik)</label>
+                            <div class="input-group input-group-sm">
+                                <input type="url" class="form-control font-monospace border-primary bg-light text-primary" id="jwt_callbackURL" name="jwt_callbackURL" value="<%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/login/jwt/callback') : 'http://localhost:3000/login/jwt/callback' %>" style="cursor: not-allowed;" readonly>
+                                <button class="btn btn-primary shadow-none" type="button"
+                                    onclick="navigator.clipboard.writeText(document.getElementById('jwt_callbackURL').value)"
+                                    title="Kopyala"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                            <div class="form-text text-muted small">IdP'nin dönüş yapacağı adrestir. SAML yapılandırmasındaki Sistem Domain Adresiyle senkronizedir.</div>
                         </div>
                     </div>
 

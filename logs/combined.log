@@ -127,3 +127,78 @@
 {"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize JWT Strategy:","service":"easy-saml-service","timestamp":"2026-03-21T10:32:19.391Z"}
 {"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-03-21T10:32:22.012Z"}
 {"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-21T10:32:22.017Z"}
+{"authnRequestsSigned":false,"hasPrivateKey":false,"level":"info","message":"[DEBUG] Strategy Options Mapped:","securityConfig":{"clockSkew":300,"digestAlgorithm":"sha256","signatureAlgorithm":"sha256","wantAssertionsSigned":false,"wantMessagesSigned":false,"wantNameIdEncrypted":false},"service":"easy-saml-service","timestamp":"2026-03-22T15:42:28.865Z"}
+{"authnRequestsSigned":false,"cert":"MISSING","entryPoint":"","idpCert":"MISSING","issuer":"http://localhost:3000/saml/metadata","level":"info","message":"SAML Strategy Options (Final):","service":"easy-saml-service","timestamp":"2026-03-22T15:42:28.867Z"}
+{"0":"c","1":"a","10":"l","11":" ","12":"i","13":"s","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"l","20":"r","21":"e","22":"d","3":"l","4":"b","5":"a","6":"c","7":"k","8":"U","9":"r","level":"error","message":"[WARNING] Failed to initialize SAML Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T15:42:28.867Z"}
+{"level":"info","message":"Using Dummy SAML Strategy to allow server startup.","service":"easy-saml-service","timestamp":"2026-03-22T15:42:28.867Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize OAuth Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T15:42:28.868Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize JWT Strategy:","service":"easy-saml-service","timestamp":"2026-03-22T15:42:28.868Z"}
+{"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-03-22T15:42:29.848Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T15:42:29.853Z"}
+{"level":"info","message":"[REQUEST] GET /favicon.ico","service":"easy-saml-service","timestamp":"2026-03-22T15:42:30.539Z"}
+{"level":"info","message":"[REQUEST] GET /login/sso","service":"easy-saml-service","timestamp":"2026-03-22T15:42:34.038Z"}
+{"level":"info","message":"[REQUEST] GET /login?error=saml_missing","service":"easy-saml-service","timestamp":"2026-03-22T15:42:34.041Z"}
+{"level":"info","message":"[REQUEST] GET /login/oauth","service":"easy-saml-service","timestamp":"2026-03-22T15:42:37.228Z"}
+{"level":"info","message":"[REQUEST] GET /login?error=oauth_missing","service":"easy-saml-service","timestamp":"2026-03-22T15:42:37.237Z"}
+{"level":"info","message":"[REQUEST] GET /login/jwt","service":"easy-saml-service","timestamp":"2026-03-22T15:42:38.339Z"}
+{"level":"info","message":"[REQUEST] GET /login?error=jwt_missing","service":"easy-saml-service","timestamp":"2026-03-22T15:42:38.341Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-03-22T15:42:39.154Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:42:39.157Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:42:41.890Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:42:45.337Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:42:46.880Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:42:47.687Z"}
+{"level":"info","message":"[REQUEST] GET /glossary","service":"easy-saml-service","timestamp":"2026-03-22T15:42:48.832Z"}
+{"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-03-22T15:42:49.964Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T15:42:49.970Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:42:49.973Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:42:57.112Z"}
+{"authnRequestsSigned":false,"hasPrivateKey":false,"level":"info","message":"[DEBUG] Strategy Options Mapped:","securityConfig":{"clockSkew":300,"digestAlgorithm":"sha256","signatureAlgorithm":"sha256","wantAssertionsSigned":false,"wantMessagesSigned":false,"wantNameIdEncrypted":false},"service":"easy-saml-service","timestamp":"2026-03-22T15:45:57.131Z"}
+{"authnRequestsSigned":false,"cert":"MISSING","entryPoint":"","idpCert":"MISSING","issuer":"http://localhost:3000/saml/metadata","level":"info","message":"SAML Strategy Options (Final):","service":"easy-saml-service","timestamp":"2026-03-22T15:45:57.132Z"}
+{"0":"c","1":"a","10":"l","11":" ","12":"i","13":"s","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"l","20":"r","21":"e","22":"d","3":"l","4":"b","5":"a","6":"c","7":"k","8":"U","9":"r","level":"error","message":"[WARNING] Failed to initialize SAML Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T15:45:57.133Z"}
+{"level":"info","message":"Using Dummy SAML Strategy to allow server startup.","service":"easy-saml-service","timestamp":"2026-03-22T15:45:57.133Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize OAuth Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T15:45:57.133Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize JWT Strategy:","service":"easy-saml-service","timestamp":"2026-03-22T15:45:57.133Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:45:59.504Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T15:45:59.512Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-03-22T15:46:00.650Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:46:00.654Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:46:02.348Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:47:12.362Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:47:17.948Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:47:18.923Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:47:19.646Z"}
+{"level":"info","message":"[REQUEST] GET /glossary","service":"easy-saml-service","timestamp":"2026-03-22T15:47:20.210Z"}
+{"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-03-22T15:47:21.360Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T15:47:21.363Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:47:21.369Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:47:23.033Z"}
+{"authnRequestsSigned":false,"hasPrivateKey":false,"level":"info","message":"[DEBUG] Strategy Options Mapped:","securityConfig":{"clockSkew":300,"digestAlgorithm":"sha256","signatureAlgorithm":"sha256","wantAssertionsSigned":false,"wantMessagesSigned":false,"wantNameIdEncrypted":false},"service":"easy-saml-service","timestamp":"2026-03-22T15:47:46.233Z"}
+{"authnRequestsSigned":false,"cert":"MISSING","entryPoint":"","idpCert":"MISSING","issuer":"http://localhost:3000/saml/metadata","level":"info","message":"SAML Strategy Options (Final):","service":"easy-saml-service","timestamp":"2026-03-22T15:47:46.235Z"}
+{"0":"c","1":"a","10":"l","11":" ","12":"i","13":"s","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"l","20":"r","21":"e","22":"d","3":"l","4":"b","5":"a","6":"c","7":"k","8":"U","9":"r","level":"error","message":"[WARNING] Failed to initialize SAML Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T15:47:46.235Z"}
+{"level":"info","message":"Using Dummy SAML Strategy to allow server startup.","service":"easy-saml-service","timestamp":"2026-03-22T15:47:46.236Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize OAuth Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T15:47:46.236Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize JWT Strategy:","service":"easy-saml-service","timestamp":"2026-03-22T15:47:46.236Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:47:49.646Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T15:47:49.656Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-03-22T15:47:51.550Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T15:47:51.554Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:47:53.046Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T15:48:07.145Z"}
+{"authnRequestsSigned":false,"hasPrivateKey":false,"level":"info","message":"[DEBUG] Strategy Options Mapped:","securityConfig":{"clockSkew":300,"digestAlgorithm":"sha256","signatureAlgorithm":"sha256","wantAssertionsSigned":false,"wantMessagesSigned":false,"wantNameIdEncrypted":false},"service":"easy-saml-service","timestamp":"2026-03-22T16:47:41.532Z"}
+{"authnRequestsSigned":false,"cert":"MISSING","entryPoint":"","idpCert":"MISSING","issuer":"http://localhost:3000/saml/metadata","level":"info","message":"SAML Strategy Options (Final):","service":"easy-saml-service","timestamp":"2026-03-22T16:47:41.535Z"}
+{"0":"c","1":"a","10":"l","11":" ","12":"i","13":"s","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"l","20":"r","21":"e","22":"d","3":"l","4":"b","5":"a","6":"c","7":"k","8":"U","9":"r","level":"error","message":"[WARNING] Failed to initialize SAML Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T16:47:41.535Z"}
+{"level":"info","message":"Using Dummy SAML Strategy to allow server startup.","service":"easy-saml-service","timestamp":"2026-03-22T16:47:41.535Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize OAuth Strategy (likely missing config):","service":"easy-saml-service","timestamp":"2026-03-22T16:47:41.535Z"}
+{"0":"O","1":"A","10":"t","11":"e","12":"g","13":"y","14":" ","15":"r","16":"e","17":"q","18":"u","19":"i","2":"u","20":"r","21":"e","22":"s","23":" ","24":"a","25":" ","26":"c","27":"l","28":"i","29":"e","3":"t","30":"n","31":"t","32":"I","33":"D","34":" ","35":"o","36":"p","37":"t","38":"i","39":"o","4":"h","40":"n","5":"2","6":"S","7":"t","8":"r","9":"a","level":"error","message":"[WARNING] Failed to initialize JWT Strategy:","service":"easy-saml-service","timestamp":"2026-03-22T16:47:41.535Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T16:47:44.152Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T16:47:44.159Z"}
+{"level":"info","message":"[REQUEST] POST /login","service":"easy-saml-service","timestamp":"2026-03-22T16:47:45.375Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T16:47:45.379Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T16:47:48.274Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T16:47:52.708Z"}
+{"level":"info","message":"[REQUEST] GET /admin","service":"easy-saml-service","timestamp":"2026-03-22T16:47:53.653Z"}
+{"level":"info","message":"[REQUEST] GET /dashboard","service":"easy-saml-service","timestamp":"2026-03-22T16:48:43.639Z"}
+{"level":"info","message":"[REQUEST] GET /logout","service":"easy-saml-service","timestamp":"2026-03-22T16:48:45.193Z"}
+{"level":"info","message":"[REQUEST] GET /","service":"easy-saml-service","timestamp":"2026-03-22T16:48:45.204Z"}
+{"level":"info","message":"[REQUEST] GET /login","service":"easy-saml-service","timestamp":"2026-03-22T16:48:45.206Z"}
