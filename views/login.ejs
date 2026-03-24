@@ -118,6 +118,8 @@
         .sso-saml:hover { background: #0078D4; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(0, 120, 212, 0.3); }
         .sso-oauth { background: #fff4e5; color: #F25022; border-color: #fff4e5; }
         .sso-oauth:hover { background: #F25022; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(242, 80, 34, 0.3); }
+        .sso-oidc { background: #e0f2fe; color: #0284c7; border-color: #e0f2fe;}
+        .sso-oidc:hover { background: #0284c7; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(2, 132, 199, 0.3); }
         .sso-jwt { background: #f3f0ff; color: #7952B3; border-color: #f3f0ff;}
         .sso-jwt:hover { background: #7952B3; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 15px -5px rgba(121, 82, 179, 0.3); }
 
@@ -210,6 +212,9 @@
                 </a>
                 <a href="/login/oauth" class="sso-btn sso-oauth">
                     <i class="bi bi-link-45deg fs-4"></i> OAuth 2.0 ile Giriş
+                </a>
+                <a href="/login/oidc" class="sso-btn sso-oidc" style="margin-bottom: 0.8rem;">
+                    <i class="bi bi-cloud-check-fill fs-5"></i> OIDC (AuthN) ile Giriş
                 </a>
                 <a href="/login/jwt" class="sso-btn sso-jwt">
                     <i class="bi bi-key-fill fs-5"></i> JWT ile Giriş

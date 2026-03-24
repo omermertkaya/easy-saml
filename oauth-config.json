@@ -1,8 +1,8 @@
 {
   "authorizationURL": "https://provider.com/oauth2/authorize",
   "tokenURL": "https://provider.com/oauth2/token",
-  "clientID": "",
-  "clientSecret": "",
+  "clientID": "client_id",
+  "clientSecret": "client_secret",
   "callbackURL": "http://localhost:3000/login/oauth/callback",
   "userInfoURL": "",
   "attributeMapping": {

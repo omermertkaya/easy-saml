@@ -1,32 +1,24 @@
 {
+  "strict": true,
+  "debug": false,
   "sp": {
+    "entityId": "passport-saml",
+    "acsUrl": "http://localhost:3000/login/sso/callback",
     "baseUrl": "http://localhost:3000",
-    "additionalClaims": {
-      "claim1": "value1"
-    },
-    "enableRelayState": true
+    "nameIdFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
   },
   "idp": {
-    "ssoUrl": "",
-    "cert": ""
+    "entityId": "https://dev-xxxxxxxxx.us.auth0.com/samlp/xxxxxxxxx",
+    "ssoUrl": "https://dev-xxxxxxxxx.us.auth0.com/samlp/xxxxxxxxx",
+    "x509cert": "MIIDpDCCAoygAwIBAgIG..."
   },
   "security": {
-    "wantAssertionsSigned": false,
-    "wantMessagesSigned": false,
-    "wantNameIdEncrypted": false,
-    "clockSkew": 300,
-    "signatureAlgorithm": "sha256",
-    "digestAlgorithm": "sha256"
+    "authnRequestsSigned": false,
+    "wantAssertionsSigned": true,
+    "signatureAlgorithm": "sha256"
   },
   "attributeMapping": {
-    "email": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
-    "firstName": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
-    "lastName": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
-    "username": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-    "department": "department",
-    "roles": "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"
-  },
-  "permissions": {
-    "rules": []
+    "email": "email",
+    "username": "uid"
   }
 }

@@ -33,5 +33,12 @@
     "description": "JWT entegrasyon ayarlarınızı tamamlayarak başarılı bir SSO kimlik doğrulama işlemi gerçekleştirin.",
     "completed": false,
     "completedAt": null
+  },
+  {
+    "id": "oidc-setup",
+    "title": "Görev 6: OIDC (AuthN/Z) Doğrulaması",
+    "description": "OpenID Connect (OIDC) sağlayıcı veya kimlik doğrulama yapılandırmanızı tamamlayarak başarılı bir SSO bağlantısı gerçekleştirin.",
+    "completed": false,
+    "completedAt": null
   }
 ]

@@ -73,6 +73,7 @@ const users = [
 const configPath = path.join(__dirname, '../saml-config.json');
 const oauthConfigPath = path.join(__dirname, '../oauth-config.json');
 const jwtConfigPath = path.join(__dirname, '../jwt-config.json');
+const oidcConfigPath = path.join(__dirname, '../oidc-config.json');
 
 function normalizeBaseUrl(input) {
     if (!input || typeof input !== 'string') return '';
@@ -283,10 +284,50 @@ function saveJwtConfig(config) {
     }
 }
 
+function loadOidcConfig() {
+    let config = {
+        authorizationURL: 'https://prod-account.test.alkanlab.com/oidc/authorize',
+        tokenURL: 'https://prod-account.test.alkanlab.com/oidc/token',
+        userInfoURL: 'https://prod-account.test.alkanlab.com/oidc/userinfo',
+        configurationURL: 'https://prod-account.test.alkanlab.com/oidc/.well-known/openid-configuration',
+        jwksURL: 'https://prod-account.test.alkanlab.com/oidc/.well-known/jwks',
+        clientID: '2db13fbf-d9f9-5ebf-a097-bca9adad222c',
+        clientSecret: '',
+        scope: 'openid profile email',
+        grantType: 'client_credentials',
+        callbackURL: 'http://localhost:3000/login/oidc/callback',
+        attributeMapping: { email: 'email', username: 'preferred_username', firstName: 'given_name', lastName: 'family_name', department: 'department', roles: 'roles' }
+    };
+    try {
+        if (fs.existsSync(oidcConfigPath)) {
+            const data = fs.readFileSync(oidcConfigPath, 'utf8');
+            const loaded = JSON.parse(data);
+            config = { ...config, ...loaded };
+            if (!config.attributeMapping) {
+                config.attributeMapping = { email: 'email', username: 'preferred_username', firstName: 'given_name', lastName: 'family_name', department: 'department', roles: 'roles' };
+            }
+        }
+    } catch (e) {
+        logger.error('Error loading OIDC config:', e);
+    }
+    return config;
+}
+
+function saveOidcConfig(config) {
+    try {
+        fs.writeFileSync(oidcConfigPath, JSON.stringify(config, null, 2), 'utf8');
+        return true;
+    } catch (e) {
+        logger.error('Error saving OIDC config:', e);
+        return false;
+    }
+}
+
 // Initial configuration load
 let samlConfig = loadSamlConfig();
 let oauthConfig = loadOauthConfig();
 let jwtConfig = loadJwtConfig();
+let oidcConfig = loadOidcConfig();
 
 // Ensure baseUrl is present for sensible defaults (especially for metadata URL)
 if (!samlConfig.sp) samlConfig.sp = {};
@@ -755,6 +796,120 @@ try {
 }
 
 
+// 5. OIDC Strategy Configuration
+function oidcVerifyCallback(accessToken, refreshToken, profile, done) {
+    try {
+        addSamlEvent('SP', 'OIDC Verified', 'OIDC IdP kimlik doğrulamasını başarıyla tamamladı.', { accessToken: accessToken ? '*****' : null });
+        
+        const rawEmail = (profile && profile.email) || (profile && profile.emails && profile.emails[0] ? profile.emails[0].value : 'oidc@example.com');
+        const rawUsername = profile && (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) ? (profile.preferred_username || profile.nickname || profile.username || profile.displayName || profile.name) : 'oidc_user';
+        const rawId = profile && (profile.sub || profile.id) ? (profile.sub || profile.id) : 'oidc-user';
+        const rawFirstName = profile && (profile.given_name || profile.givenName || (profile.name && profile.name.givenName)) ? (profile.given_name || profile.givenName || profile.name.givenName) : '';
+        const rawLastName = profile && (profile.family_name || profile.familyName || (profile.name && profile.name.familyName)) ? (profile.family_name || profile.familyName || profile.name.familyName) : '';
+
+        const mapping = oidcConfig.attributeMapping || {};
+        const mappedEmail = mapping.email ? getPropByString(profile, mapping.email) : rawEmail;
+        const mappedUsername = mapping.username ? getPropByString(profile, mapping.username) : rawUsername;
+        const mappedFirstName = mapping.firstName ? getPropByString(profile, mapping.firstName) : rawFirstName;
+        const mappedLastName = mapping.lastName ? getPropByString(profile, mapping.lastName) : rawLastName;
+        const mappedDepartment = mapping.department ? getPropByString(profile, mapping.department) : (profile && profile.department ? profile.department : '');
+        let mappedRoles = mapping.roles ? getPropByString(profile, mapping.roles) : (profile.roles || profile.groups || []);
+
+        if (!Array.isArray(mappedRoles)) {
+             mappedRoles = typeof mappedRoles === 'string' ? mappedRoles.split(',').map(s=>s.trim()) : [];
+        }
+
+        const user = {
+            id: String(rawId),
+            username: String(mappedUsername || rawUsername || 'oidc_user'),
+            email: String(mappedEmail || rawEmail || 'oidc@example.com'),
+            source: 'oidc',
+            permissions: [],
+            oauthProfile: profile,
+            mappedProfile: {
+                email: String(mappedEmail || rawEmail || ''),
+                firstName: String(mappedFirstName || ''),
+                lastName: String(mappedLastName || ''),
+                username: String(mappedUsername || rawUsername || ''),
+                department: String(mappedDepartment || ''),
+                roles: mappedRoles
+            }
+        };
+        
+        // Mark OIDC setup task as complete
+        taskManager.completeTask('oidc-setup');
+        
+        return done(null, user);
+    } catch (error) {
+        logger.error('[CRITICAL] Error in oidcVerifyCallback:', error);
+        return done(error);
+    }
+}
+
+try {
+    const oidcStrategyOptions = {
+        authorizationURL: oidcConfig.authorizationURL || 'https://placeholder.com/authorize',
+        tokenURL: oidcConfig.tokenURL,
+        clientID: oidcConfig.clientID,
+        clientSecret: oidcConfig.clientSecret,
+        callbackURL: oidcConfig.callbackURL,
+        customHeaders: {},
+        scope: oidcConfig.scope ? oidcConfig.scope.split(' ') : ['openid', 'profile']
+    };
+    
+    const oidcStrategy = new OAuth2Strategy(oidcStrategyOptions, oidcVerifyCallback);
+    
+    oidcStrategy.userProfile = function(accessToken, done) {
+        if (!oidcConfig.userInfoURL) {
+            return done(null, {});
+        }
+        this._oauth2.get(oidcConfig.userInfoURL, accessToken, function (err, body, res) {
+            if (err) {
+                logger.error('[OIDC] Failed to fetch user profile', err);
+                return done(null, {});
+            }
+            try {
+                const json = JSON.parse(body);
+                done(null, json);
+            } catch (ex) {
+                logger.error('[OIDC] Failed to parse user profile', ex);
+                done(null, {});
+            }
+        });
+    };
+
+    if (oidcConfig.grantType === 'client_credentials') {
+       oidcStrategy.authenticate = function(req, options) {
+            this._oauth2.getOAuthAccessToken(
+              '', { grant_type: 'client_credentials' },
+              (err, accessToken, refreshToken, results) => {
+                 if (err) return this.fail({ message: err.data || err.message || 'Token endpoint error' }, 401);
+                 this._loadUserProfile(accessToken, (err, profile) => {
+                    // It's okay if profile fails for client_credentials if userInfo is unused
+                    const finalProfile = profile || {};
+                    oidcVerifyCallback(accessToken, refreshToken, finalProfile, (err, user, info) => {
+                       if (err) return this.error(err);
+                       if (!user) return this.fail(info);
+                       this.success(user, info);
+                    });
+                 });
+              }
+           );
+       };
+    }
+
+    passport.use('oidc', oidcStrategy);
+} catch (e) {
+    logger.error('[WARNING] Failed to initialize OIDC Strategy:', e.message);
+    passport.use('oidc', {
+        name: 'oidc',
+        authenticate: function (req, options) {
+            this.fail({ message: 'OIDC yapılandırması eksik.' }, 400);
+        }
+    });
+}
+
+
 // --- Authentication Logic End ---
 
 // Routes
@@ -815,12 +970,16 @@ app.get('/login', (req, res) => {
     } else if (req.query.error === 'jwt_missing') {
         alertMessage = 'JWT ayarları yapılandırılmamış. Lütfen yönetici paneli üzerinden ayarlamaları tamamlayın.';
         alertType = 'warning';
+    } else if (req.query.error === 'oidc_missing') {
+        alertMessage = 'OIDC AuthN/Z ayarları yapılandırılmamış. Lütfen yönetici panelinden konfigürasyonu tamamlayın.';
+        alertType = 'warning';
     }
 
     res.render('login', {
         title: 'Giriş Yap',
         defaultUser: defaultUser,
         jwtConfig: jwtConfig,
+        oidcConfig: oidcConfig,
         message: alertMessage,
         messageType: alertType
     });
@@ -1187,6 +1346,38 @@ app.get('/login/jwt/callback', passport.authenticate('jwt', {
 // Admin Page Route
 
 
+console.log("Registering OIDC routes...");
+// --- OIDC Login / Callback ---
+app.get('/testoidc', (req, res) => res.send("Debug OIDC Endpoint Reached!"));
+
+app.get('/login/oidc', (req, res, next) => {
+    if (!oidcConfig || !oidcConfig.clientID || oidcConfig.clientID.trim() === '') {
+        return res.redirect('/login?error=oidc_missing');
+    }
+    next();
+}, (req, res, next) => {
+    passport.authenticate('oidc', { failureRedirect: '/login', failureMessage: true }, (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            return res.redirect('/login');
+        }
+        req.login(user, (loginErr) => {
+            if (loginErr) {
+                return next(loginErr);
+            }
+            return res.redirect('/dashboard');
+        });
+    })(req, res, next);
+});
+
+app.get('/login/oidc/callback', passport.authenticate('oidc', {
+    successRedirect: '/dashboard',
+    failureRedirect: '/login',
+    failureMessage: true
+}));
+
 // API Endpoint for Live Events (Accessible to all authenticated users)
 app.get('/api/events', (req, res) => {
     if (!req.isAuthenticated()) {
@@ -1306,6 +1497,43 @@ app.post('/admin/save-saml', (req, res) => {
     }
 });
 
+// Save Configuration Route - OIDC
+app.post('/admin/save-oidc', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+
+    try {
+        oidcConfig.authorizationURL = req.body.oidc_authorizationURL;
+        oidcConfig.tokenURL = req.body.oidc_tokenURL;
+        oidcConfig.userInfoURL = req.body.oidc_userInfoURL;
+        oidcConfig.configurationURL = req.body.oidc_configurationURL;
+        oidcConfig.jwksURL = req.body.oidc_jwksURL;
+        oidcConfig.clientID = req.body.oidc_clientID;
+        oidcConfig.clientSecret = req.body.oidc_clientSecret;
+        oidcConfig.scope = req.body.oidc_scope;
+        oidcConfig.grantType = req.body.oidc_grantType || 'client_credentials';
+        oidcConfig.callbackURL = req.body.oidc_callbackURL;
+
+        if (!oidcConfig.attributeMapping) oidcConfig.attributeMapping = {};
+        oidcConfig.attributeMapping.email = req.body.oidc_attr_email;
+        oidcConfig.attributeMapping.username = req.body.oidc_attr_username;
+        oidcConfig.attributeMapping.firstName = req.body.oidc_attr_firstName;
+        oidcConfig.attributeMapping.lastName = req.body.oidc_attr_lastName;
+        oidcConfig.attributeMapping.department = req.body.oidc_attr_department;
+        oidcConfig.attributeMapping.roles = req.body.oidc_attr_roles;
+
+        if (!saveOidcConfig(oidcConfig)) {
+            return res.status(500).send('Ayarlar kaydedilirken bir hata oluştu.');
+        }
+
+        res.redirect('/admin?success=true');
+    } catch (e) {
+        logger.error("OIDC Config save error:", e);
+        res.status(500).send('Ayarlar kaydedilirken hata oluştu: ' + e.message);
+    }
+});
+
 // Helper for deep setting
 function safeSet(obj, path, value) {
     if (!obj) return;
@@ -1374,6 +1602,7 @@ app.get('/admin', (req, res, next) => {
         config: samlConfig,
         oauthConfig: oauthConfig,
         jwtConfig: jwtConfig,
+        oidcConfig: oidcConfig,
         user: req.user,
         permissionRules: mappedRules,
         message: req.query.success ? 'Ayarlar başarıyla kaydedildi! Strategy yeniden başlatıldı.' : null,
@@ -1398,6 +1627,92 @@ app.post('/admin/reset-tasks', (req, res) => {
     }
     taskManager.resetTasks();
     res.redirect('/admin?success=tasks_reset');
+});
+
+// API: Reset SAML
+app.post('/admin/reset-saml', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+    const scope = req.body.reset_scope || 'all';
+
+    if (scope === 'all') {
+        if (fs.existsSync(configPath)) fs.unlinkSync(configPath);
+        Object.keys(samlConfig).forEach(k => delete samlConfig[k]);
+        Object.assign(samlConfig, loadSamlConfig());
+    } else if (scope === 'idp') {
+        samlConfig.idp = loadSamlConfig().idp;
+    } else if (scope === 'security') {
+        samlConfig.security = loadSamlConfig().security;
+    } else if (scope === 'mapping') {
+        samlConfig.attributeMapping = loadSamlConfig().attributeMapping;
+        samlConfig.permissions = { sourceAttribute: 'groups', rules: [] };
+    }
+    
+    saveSamlConfig(samlConfig);
+    res.redirect('/admin?success=saml_reset');
+});
+
+// API: Reset OAuth
+app.post('/admin/reset-oauth', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+    if (fs.existsSync(oauthConfigPath)) fs.unlinkSync(oauthConfigPath);
+    Object.keys(oauthConfig).forEach(k => delete oauthConfig[k]);
+    Object.assign(oauthConfig, loadOauthConfig());
+    saveOauthConfig(oauthConfig);
+    res.redirect('/admin?success=oauth_reset');
+});
+
+// API: Reset JWT
+app.post('/admin/reset-jwt', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+    if (fs.existsSync(jwtConfigPath)) fs.unlinkSync(jwtConfigPath);
+    Object.keys(jwtConfig).forEach(k => delete jwtConfig[k]);
+    Object.assign(jwtConfig, loadJwtConfig());
+    saveJwtConfig(jwtConfig);
+    res.redirect('/admin?success=jwt_reset');
+});
+
+// API: Reset OIDC
+app.post('/admin/reset-oidc', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+    if (fs.existsSync(oidcConfigPath)) fs.unlinkSync(oidcConfigPath);
+    Object.keys(oidcConfig).forEach(k => delete oidcConfig[k]);
+    Object.assign(oidcConfig, loadOidcConfig());
+    saveOidcConfig(oidcConfig);
+    res.redirect('/admin?success=oidc_reset');
+});
+
+// API: Factory Reset
+app.post('/admin/factory-reset', (req, res) => {
+    if (!req.isAuthenticated() || req.user.username !== 'admin') {
+        return res.status(403).send('Erişim reddedildi.');
+    }
+    const eventsPath = path.join(__dirname, '../events.json');
+    const tasksPath = path.join(__dirname, 'tasks.json');
+    const files = [configPath, oauthConfigPath, jwtConfigPath, oidcConfigPath, tasksPath, eventsPath];
+    files.forEach(p => {
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+    });
+    
+    res.send(`
+        <html>
+            <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+                <h1 style="color: red;">Sistem Fabrika Ayarlarına Döndürüldü</h1>
+                <p>Tüm config dosyaları ve kayıtlar silindi.</p>
+                <p>Uygulama yeniden başlatılıyor... Lütfen sayfayı yenileyin.</p>
+                <script>setTimeout(function(){ window.location.href='/'; }, 3000);</script>
+            </body>
+        </html>
+    `);
+    
+    setTimeout(() => { process.exit(0); }, 500);
 });
 
 // Dashboard (Protected Route)

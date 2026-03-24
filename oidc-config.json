@@ -1,0 +1,20 @@
+{
+  "authorizationURL": "https://identity.yourdomain.com/oidc/authorize",
+  "tokenURL": "https://identity.yourdomain.com/oidc/token",
+  "userInfoURL": "https://identity.yourdomain.com/oidc/userinfo",
+  "configurationURL": "https://identity.yourdomain.com/oidc/.well-known/openid-configuration",
+  "jwksURL": "https://identity.yourdomain.com/oidc/.well-known/jwks",
+  "clientID": "your-client-id-here",
+  "clientSecret": "your-client-secret-here",
+  "scope": "openid profile email",
+  "grantType": "authorization_code",
+  "callbackURL": "http://localhost:3000/login/oidc/callback",
+  "attributeMapping": {
+    "email": "email",
+    "username": "preferred_username",
+    "firstName": "given_name",
+    "lastName": "family_name",
+    "department": "department",
+    "roles": "roles"
+  }
+}

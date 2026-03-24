@@ -54,6 +54,11 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold px-4 text-dark" id="main-oidc-tab" data-bs-toggle="tab" data-bs-target="#main-oidc" type="button" role="tab" aria-controls="main-oidc" aria-selected="false">
+                            <i class="bi bi-cloud-check-fill me-2 text-primary"></i>OIDC (AuthN)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold px-4 text-dark" id="main-edu-tab" data-bs-toggle="tab" data-bs-target="#main-edu" type="button" role="tab" aria-controls="main-edu" aria-selected="false">
                             <i class="bi bi-mortarboard me-2 text-success"></i>Eğitim & Sistem
                         </button>
@@ -122,7 +127,7 @@
                                                         id="sp_baseUrl" name="sp_baseUrl"
                                                         value="<%= (config.sp && config.sp.baseUrl) ? config.sp.baseUrl : 'http://localhost:3000' %>"
                                                         placeholder="Örn: https://sso.mycompany.com"
-                                                        oninput="const base = this.value.replace(/\/$/, ''); document.getElementById('sp_entityId').value = base + '/saml/metadata'; document.getElementById('sp_acsUrl').value = base + '/login/sso/callback'; document.getElementById('hint_acsUrl').innerText = base + '/login/sso/callback'; document.getElementById('hint_metadataUrl').innerText = base + '/saml/metadata'; document.getElementById('hint_entityId').innerText = base + '/saml/metadata'; const o = document.getElementById('oauth_callbackURL'); if(o) o.value = base + '/login/oauth/callback'; const j = document.getElementById('jwt_callbackURL'); if(j) j.value = base + '/login/jwt/callback';">
+                                                        oninput="const base = this.value.replace(/\/$/, ''); document.getElementById('sp_entityId').value = base + '/saml/metadata'; document.getElementById('sp_acsUrl').value = base + '/login/sso/callback'; document.getElementById('hint_acsUrl').innerText = base + '/login/sso/callback'; document.getElementById('hint_metadataUrl').innerText = base + '/saml/metadata'; document.getElementById('hint_entityId').innerText = base + '/saml/metadata'; const o = document.getElementById('oauth_callbackURL'); if(o) o.value = base + '/login/oauth/callback'; const j = document.getElementById('jwt_callbackURL'); if(j) j.value = base + '/login/jwt/callback'; const oi = document.getElementById('oidc_callbackURL'); if(oi) oi.value = base + '/login/oidc/callback';">
                                                     <button class="btn btn-outline-secondary" type="button"
                                                         onclick="navigator.clipboard.writeText(document.getElementById('sp_baseUrl').value)"
                                                         title="Kopyala"><i class="bi bi-clipboard"></i></button>
@@ -568,6 +573,101 @@
         </div>
         </div><!-- End JWT Pane -->
 
+        <!-- OIDC Pane -->
+        <div class="tab-pane fade" id="main-oidc" role="tabpanel" aria-labelledby="main-oidc-tab">
+        <div class="card shadow border-0">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-2">
+                <h3 class="fw-bold text-dark"><i class="bi bi-cloud-check-fill me-2 text-primary"></i>OIDC (AuthN/Z) Sunucu Yapılandırması</h3>
+                <p class="text-muted">Identity Provider'ınızın OpenID Connect (OIDC) sağlayıcı veya Machine-to-Machine yetkilendirme ayarlarını buradan yapabilirsiniz.</p>
+            </div>
+            <div class="card-body p-4 pt-2">
+                <form id="oidcConfigForm" action="/admin/save-oidc" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-12 mb-3">
+                            <label for="oidc_configurationURL" class="form-label fw-bold small">Discovery URL (OpenID Configuration)</label>
+                            <input type="url" class="form-control font-monospace border-primary bg-light" id="oidc_configurationURL" name="oidc_configurationURL" value="<%= locals.oidcConfig ? oidcConfig.configurationURL : '' %>" placeholder="https://provider.com/.well-known/openid-configuration">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_authorizationURL" class="form-label fw-bold small">Authorization URL</label>
+                            <input type="url" class="form-control font-monospace" id="oidc_authorizationURL" name="oidc_authorizationURL" value="<%= locals.oidcConfig ? oidcConfig.authorizationURL : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_tokenURL" class="form-label fw-bold small">Token URL</label>
+                            <input type="url" class="form-control font-monospace" id="oidc_tokenURL" name="oidc_tokenURL" value="<%= locals.oidcConfig ? oidcConfig.tokenURL : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_userInfoURL" class="form-label fw-bold small">User Info URL</label>
+                            <input type="url" class="form-control font-monospace" id="oidc_userInfoURL" name="oidc_userInfoURL" value="<%= locals.oidcConfig ? oidcConfig.userInfoURL : '' %>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_jwksURL" class="form-label fw-bold small">JSON Web Key Set (JWKS)</label>
+                            <input type="url" class="form-control font-monospace" id="oidc_jwksURL" name="oidc_jwksURL" value="<%= locals.oidcConfig ? oidcConfig.jwksURL : '' %>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_clientID" class="form-label fw-bold small">Client ID</label>
+                            <input type="text" class="form-control font-monospace" id="oidc_clientID" name="oidc_clientID" value="<%= locals.oidcConfig ? oidcConfig.clientID : '' %>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_clientSecret" class="form-label fw-bold small">Client Secret</label>
+                            <input type="password" class="form-control font-monospace" id="oidc_clientSecret" name="oidc_clientSecret" value="<%= locals.oidcConfig ? oidcConfig.clientSecret : '' %>" placeholder="****************">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_grantType" class="form-label fw-bold small">Grant Type</label>
+                            <select class="form-select font-monospace" id="oidc_grantType" name="oidc_grantType">
+                                <option value="authorization_code" <%= locals.oidcConfig && oidcConfig.grantType === 'authorization_code' ? 'selected' : '' %>>Authorization Code</option>
+                                <option value="client_credentials" <%= locals.oidcConfig && oidcConfig.grantType === 'client_credentials' ? 'selected' : '' %>>Client Credentials (M2M)</option>
+                                <option value="implicit" <%= locals.oidcConfig && oidcConfig.grantType === 'implicit' ? 'selected' : '' %>>Implicit</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="oidc_scope" class="form-label fw-bold small">Scope</label>
+                            <input type="text" class="form-control font-monospace" id="oidc_scope" name="oidc_scope" value="<%= locals.oidcConfig ? oidcConfig.scope : 'openid profile email' %>" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="oidc_callbackURL" class="form-label fw-bold small text-uppercase text-primary">Callback URL (Otomatik)</label>
+                            <div class="input-group input-group-sm">
+                                <input type="url" class="form-control font-monospace border-primary bg-light text-primary" id="oidc_callbackURL" name="oidc_callbackURL" value="<%= (config.sp && config.sp.baseUrl) ? (config.sp.baseUrl.replace(/\/$/, '') + '/login/oidc/callback') : 'http://localhost:3000/login/oidc/callback' %>" style="cursor: not-allowed;" readonly>
+                                <button class="btn btn-primary shadow-none" type="button"
+                                    onclick="navigator.clipboard.writeText(document.getElementById('oidc_callbackURL').value)"
+                                    title="Kopyala"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                            <div class="form-text text-muted small">IdP'nin dönüş ve yetkilendirme adresi. SAML panelindeki Sistem Domain Adresiyle senkronizedir.</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold text-secondary text-uppercase small mb-3"><i class="bi bi-arrow-left-right me-1"></i>OIDC Attribute Eşleştirme</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="oidc_attr_email" class="form-label fw-bold small">E-Posta (Email)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oidc_attr_email" name="oidc_attr_email" value="<%= (locals.oidcConfig && locals.oidcConfig.attributeMapping) ? oidcConfig.attributeMapping.email : 'email' %>" placeholder="email">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oidc_attr_username" class="form-label fw-bold small">Kullanıcı Adı (Username)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oidc_attr_username" name="oidc_attr_username" value="<%= (locals.oidcConfig && locals.oidcConfig.attributeMapping) ? oidcConfig.attributeMapping.username : 'preferred_username' %>" placeholder="preferred_username">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oidc_attr_firstName" class="form-label fw-bold small">Ad (First Name)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oidc_attr_firstName" name="oidc_attr_firstName" value="<%= (locals.oidcConfig && locals.oidcConfig.attributeMapping) ? oidcConfig.attributeMapping.firstName : 'given_name' %>" placeholder="given_name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oidc_attr_lastName" class="form-label fw-bold small">Soyad (Last Name)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oidc_attr_lastName" name="oidc_attr_lastName" value="<%= (locals.oidcConfig && locals.oidcConfig.attributeMapping) ? oidcConfig.attributeMapping.lastName : 'family_name' %>" placeholder="family_name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oidc_attr_department" class="form-label fw-bold small">Departman (Department)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oidc_attr_department" name="oidc_attr_department" value="<%= (locals.oidcConfig && locals.oidcConfig.attributeMapping) ? oidcConfig.attributeMapping.department : '' %>" placeholder="department">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="oidc_attr_roles" class="form-label fw-bold small">Roller (Roles)</label>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="oidc_attr_roles" name="oidc_attr_roles" value="<%= (locals.oidcConfig && locals.oidcConfig.attributeMapping) ? oidcConfig.attributeMapping.roles : 'roles' %>" placeholder="roles">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div><!-- End OIDC Pane -->
+
         <!-- Eğitim & Sistem Pane -->
         <div class="tab-pane fade" id="main-edu" role="tabpanel" aria-labelledby="main-edu-tab">
         <div class="card shadow border-0">
@@ -596,13 +696,16 @@
                         <h6 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>İleri Seviye Sıfırlama (Tehlikeli Bölge)</h6>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title text-danger">SAML Yapılandırmasını Kısmi Sıfırla</h5>
-                        <p class="card-text text-muted small">Sadece IdP, Güvenlik veya Eşleştirme işlemlerini varsayılan template haline getirir.</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('IdP ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetScope').value='idp'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-arrow-counterclockwise me-1"></i> IdP Sekmesini Sıfırla</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('Güvenlik ayarlarını sıfırlamak istediğine emin misiniz?')) { document.getElementById('resetScope').value='security'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-shield-slash me-1"></i> Güvenlik Sekmesini Sıfırla</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('Eşleştirme ayarlarını sıfırlamak istediğine emin misiniz?')) { document.getElementById('resetScope').value='mapping'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-arrow-left-right me-1"></i> Eşleştirme/Yetki Sekmesini Sıfırla</button>
-                            <button type="button" class="btn btn-danger btn-sm fw-bold shadow-sm" onclick="if(confirm('TÜM SAML ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetScope').value='all'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-trash3 me-1"></i> Tüm SAML Ayarlarını Sıfırla</button>
+                        <h5 class="card-title text-danger">SSO Ayarlarını Sıfırla</h5>
+                        <p class="card-text text-muted small">SAML, OAuth 2.0, JWT veya OIDC için yapılandırma ayarlarını tek tek varsayılan ayarlarına veya belirli sekmelerini döndürebilirsiniz.</p>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('SAML ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetScope').value='all'; document.getElementById('resetSamlForm').submit(); }"><i class="bi bi-arrow-counterclockwise me-1"></i> SAML Ayarlarını Sıfırla</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('OAuth 2.0 ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetOauthForm').submit(); }"><i class="bi bi-arrow-counterclockwise me-1"></i> OAuth Ayarlarını Sıfırla</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('JWT ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetJwtForm').submit(); }"><i class="bi bi-arrow-counterclockwise me-1"></i> JWT Ayarlarını Sıfırla</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm fw-bold" onclick="if(confirm('OIDC ayarlarını sıfırlamak istediğinize emin misiniz?')) { document.getElementById('resetOidcForm').submit(); }"><i class="bi bi-arrow-counterclockwise me-1"></i> OIDC Ayarlarını Sıfırla</button>
+                            </div>
                         </div>
 
                         <hr class="my-4">
@@ -639,6 +742,9 @@
                         <button type="submit" form="jwtConfigForm" class="btn btn-warning text-dark px-4 fw-bold shadow-sm d-none" id="btn-save-jwt">
                             <i class="bi bi-save me-2"></i>JWT Ayarlarını Kaydet
                         </button>
+                        <button type="submit" form="oidcConfigForm" class="btn text-white px-4 fw-bold shadow-sm d-none" style="background-color: #0d6efd;" id="btn-save-oidc">
+                            <i class="bi bi-save me-2"></i>OIDC Ayarlarını Kaydet
+                        </button>
                     </div>
                 </div>
             </div>
@@ -653,19 +759,52 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Restore active tabs on page load
+            var tabLists = document.querySelectorAll('ul.nav.nav-tabs');
+            tabLists.forEach(function(list) {
+                if (list.id) {
+                    var storedTabId = localStorage.getItem('activeTab_' + list.id);
+                    if (storedTabId) {
+                        var tabToActivate = document.getElementById(storedTabId);
+                        if (tabToActivate) {
+                            if (window.bootstrap) {
+                                var bSTab = new bootstrap.Tab(tabToActivate);
+                                bSTab.show();
+                            } else {
+                                tabToActivate.click();
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Store active tab on user click
+            var allTabs = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            allTabs.forEach(function (tab) {
+                tab.addEventListener('shown.bs.tab', function (e) {
+                    var parentList = e.target.closest('ul.nav.nav-tabs');
+                    if (parentList && parentList.id) {
+                        localStorage.setItem('activeTab_' + parentList.id, e.target.id);
+                    }
+                });
+            });
+
             var samlTab = document.getElementById('main-saml-tab');
             var oauthTab = document.getElementById('main-oauth-tab');
             var jwtTab = document.getElementById('main-jwt-tab');
+            var oidcTab = document.getElementById('main-oidc-tab');
             var eduTab = document.getElementById('main-edu-tab');
             
             var btnSaml = document.getElementById('btn-save-saml');
             var btnOauth = document.getElementById('btn-save-oauth');
             var btnJwt = document.getElementById('btn-save-jwt');
+            var btnOidc = document.getElementById('btn-save-oidc');
 
             function resetButtons() {
                 if (btnSaml) btnSaml.classList.add('d-none');
                 if (btnOauth) btnOauth.classList.add('d-none');
                 if (btnJwt) btnJwt.classList.add('d-none');
+                if (btnOidc) btnOidc.classList.add('d-none');
             }
 
             if (samlTab) {
@@ -686,6 +825,12 @@
                     if (btnJwt) btnJwt.classList.remove('d-none');
                 });
             }
+            if (oidcTab) {
+                oidcTab.addEventListener('shown.bs.tab', function () {
+                    resetButtons();
+                    if (btnOidc) btnOidc.classList.remove('d-none');
+                });
+            }
             if (eduTab) {
                 eduTab.addEventListener('shown.bs.tab', function () {
                     resetButtons();
@@ -698,6 +843,9 @@
     <form id="resetSamlForm" action="/admin/reset-saml" method="POST" style="display:none;">
         <input type="hidden" id="resetScope" name="reset_scope" value="all">
     </form>
+    <form id="resetOauthForm" action="/admin/reset-oauth" method="POST" style="display:none;"></form>
+    <form id="resetJwtForm" action="/admin/reset-jwt" method="POST" style="display:none;"></form>
+    <form id="resetOidcForm" action="/admin/reset-oidc" method="POST" style="display:none;"></form>
     <form id="factoryResetForm" action="/admin/factory-reset" method="POST" style="display:none;"></form>
 </body>
 
